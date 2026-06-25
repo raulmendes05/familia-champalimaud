@@ -22,3 +22,8 @@ dist-ssr
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# PDF de origem + ficheiros temporários de extração
+*.pdf
+scratch_*.json
+*_err.txt
