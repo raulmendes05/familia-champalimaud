@@ -9,6 +9,7 @@ delete from public.members;
 
 insert into public.members (id, name, nickname, generation) values
   ('ping', 'Ping', 'T-Rex Gregossauro', 1),
+  ('andre', 'André', null, 2),
   ('jajonhe', 'Jajonhe', 'Tropas', 1),
   ('grizo', 'Grizo', 'Burlão', 1),
   ('hugo', 'Hugo', 'Donald', 1),
@@ -99,6 +100,7 @@ insert into public.members (id, name, nickname, generation) values
 
 insert into public.relationships (id, parent_id, child_id, type, is_primary) values
   ('r-ping-carvalheira', 'ping', 'carvalheira', 'padrinho', true),
+  ('r-ping-andre', 'ping', 'andre', 'padrinho', true),
   ('r-ping-gomes', 'ping', 'gomes', 'padrinho', true),
   ('r-jajonhe-gomes', 'jajonhe', 'gomes', 'padrinho', false),
   ('r-jajonhe-piri', 'jajonhe', 'piri', 'padrinho', true),

@@ -17,6 +17,7 @@ export const FACULDADES = {
 // [id, nome, alcunha]
 const NAMES = [
   ['ping', 'Ping', 'T-Rex Gregossauro'],
+  ['andre', 'André', ''],
   ['jajonhe', 'Jajonhe', 'Tropas'],
   ['grizo', 'Grizo', 'Burlão'],
   ['hugo', 'Hugo', 'Donald'],
@@ -109,6 +110,7 @@ const NAMES = [
 // afilhado → [padrinhos/madrinhas]  (o 1.º é o primário)
 const PADRINHOS = [
   ['carvalheira', ['ping']],
+  ['andre', ['ping']],
   ['gomes', ['ping', 'jajonhe']],
   ['piri', ['jajonhe']],
   ['bras', ['jajonhe']],
@@ -211,7 +213,7 @@ const GENERATION = {
   // Geração 1 — fundadores
   ping: 1, jajonhe: 1, grizo: 1, hugo: 1,
   // Geração 2
-  carvalheira: 2, gomes: 2, piri: 2, bras: 2, clara: 2, pedro: 2, vasco: 2,
+  carvalheira: 2, andre: 2, gomes: 2, piri: 2, bras: 2, clara: 2, pedro: 2, vasco: 2,
   rodolfo: 2, cesar: 2, henrique: 2, maria_costa: 2, andreia: 2,
   leonor_mendes: 2,
   // Geração 3
