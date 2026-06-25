@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import * as d3 from 'd3'
-import { buildHierarchy, branchOf, secondaryParentEdges } from '../utils/tree'
+import { buildHierarchy, branchOf } from '../utils/tree'
 
 const NODE_W = 168
 const NODE_H = 64
@@ -58,14 +58,6 @@ export default function FamilyTree({
     const place = (d) =>
       isVertical ? { x: d.x, y: d.y } : { x: d.y, y: d.x }
 
-    // Posição por id — para desenhar ligações de co-padrinho
-    const posById = new Map()
-    for (const n of nodes) posById.set(n.data.id, place(n))
-
-    const secondary = secondaryParentEdges(members, relationships).filter(
-      (e) => posById.has(e.parent_id) && posById.has(e.child_id)
-    )
-
     let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity
     for (const n of nodes) {
       const p = place(n)
@@ -74,7 +66,7 @@ export default function FamilyTree({
       minY = Math.min(minY, p.y)
       maxY = Math.max(maxY, p.y)
     }
-    return { nodes, links, place, posById, secondary, bounds: { minX, maxX, minY, maxY } }
+    return { nodes, links, place, bounds: { minX, maxX, minY, maxY } }
   }, [members, relationships, orientation])
 
   // Ramo destacado a partir da selecção
@@ -125,13 +117,7 @@ export default function FamilyTree({
       .call(zoomRef.current.transform, transform)
   }, [layout, size])
 
-  const { nodes, links, place, posById, secondary } = layout
-
-  // Curva suave entre duas posições de ecrã (para co-padrinhos)
-  const edgePath = (a, b) => {
-    const gen = orientation === 'vertical' ? d3.linkVertical() : d3.linkHorizontal()
-    return gen({ source: [a.x, a.y], target: [b.x, b.y] })
-  }
+  const { nodes, links, place } = layout
 
   // d3.link generator para curvas suaves. As coordenadas já estão em espaço
   // de ecrã (place() trata da orientação), por isso basta escolher a curva.
@@ -166,26 +152,9 @@ export default function FamilyTree({
           </linearGradient>
         </defs>
         <g ref={gRef}>
-          {/* Ligações de co-padrinho (tracejadas) */}
-          <g fill="none">
-            {secondary.map((e, i) => {
-              const a = posById.get(e.parent_id)
-              const b = posById.get(e.child_id)
-              const active = branch && branch.has(e.parent_id) && branch.has(e.child_id)
-              return (
-                <path
-                  key={`sec-${i}`}
-                  d={edgePath(a, b)}
-                  stroke={COLORS.purpleSoft}
-                  strokeWidth={active ? 2 : 1.3}
-                  strokeDasharray="4 4"
-                  strokeOpacity={branch && !active ? 0.15 : 0.5}
-                />
-              )
-            })}
-          </g>
-
-          {/* Ligações principais (padrinho primário) */}
+          {/* Ligações da árvore (padrinho primário) — layout tidy, sem cruzamentos.
+              Os co-padrinhos não são desenhados (evita linhas cruzadas); aparecem
+              no painel de perfil de cada membro. */}
           <g fill="none">
             {links.map((l, i) => {
               const active = linkActive(l)
