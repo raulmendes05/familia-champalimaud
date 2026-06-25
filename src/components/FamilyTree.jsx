@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import * as d3 from 'd3'
-import { buildHierarchy, branchOf } from '../utils/tree'
+import { buildHierarchy, branchOf, secondaryParentEdges } from '../utils/tree'
 
 const NODE_W = 168
 const NODE_H = 64
@@ -59,14 +59,77 @@ export default function FamilyTree({
       isVertical ? { x: d.x, y: d.y } : { x: d.y, y: d.x }
 
     let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity
+    const posById = new Map()
     for (const n of nodes) {
       const p = place(n)
+      posById.set(n.data.id, p)
       minX = Math.min(minX, p.x)
       maxX = Math.max(maxX, p.x)
       minY = Math.min(minY, p.y)
       maxY = Math.max(maxY, p.y)
     }
-    return { nodes, links, place, bounds: { minX, maxX, minY, maxY } }
+
+    // ── Ligações de co-padrinho (2.º padrinho) ──────────────────────
+    // Encaminhadas por um canal POR BAIXO da árvore, cada uma na sua
+    // "pista" (y distinto) → os troços horizontais nunca se sobrepõem.
+    const secRaw = secondaryParentEdges(members, relationships)
+      .map((e) => ({
+        parent_id: e.parent_id,
+        child_id: e.child_id,
+        s: posById.get(e.parent_id),
+        t: posById.get(e.child_id),
+      }))
+      .filter((e) => e.s && e.t)
+
+    // Partição por intervalos: pistas só são partilhadas se os intervalos
+    // em x não se cruzarem (assim os horizontais nunca colidem).
+    const withSpan = secRaw
+      .map((e) => ({ ...e, lo: Math.min(e.s.x, e.t.x), hi: Math.max(e.s.x, e.t.x) }))
+      .sort((a, b) => a.lo - b.lo)
+    const laneRight = [] // x máx. já ocupado em cada pista
+    for (const e of withSpan) {
+      let lane = laneRight.findIndex((r) => r < e.lo - 8)
+      if (lane === -1) {
+        lane = laneRight.length
+        laneRight.push(-Infinity)
+      }
+      laneRight[lane] = e.hi
+      e.lane = lane
+    }
+
+    const channelTop = maxY + NODE_H / 2 + 34
+    const laneGap = 26
+    const R = 10 // raio dos cantos
+    const secondary = withSpan.map((e) => {
+      const laneY = channelTop + e.lane * laneGap
+      const sx = e.s.x
+      const sy = e.s.y + NODE_H / 2 // sai por baixo do padrinho
+      const tx = e.t.x
+      const ty = e.t.y + NODE_H / 2 // entra por baixo do afilhado
+      const dir = tx >= sx ? 1 : -1
+      // desce → canto → horizontal na pista → canto → sobe
+      const d = [
+        `M ${sx} ${sy}`,
+        `L ${sx} ${laneY - R}`,
+        `Q ${sx} ${laneY} ${sx + dir * R} ${laneY}`,
+        `L ${tx - dir * R} ${laneY}`,
+        `Q ${tx} ${laneY} ${tx} ${laneY - R}`,
+        `L ${tx} ${ty}`,
+      ].join(' ')
+      return { d, parent_id: e.parent_id, child_id: e.child_id }
+    })
+
+    const channelBottom = secondary.length
+      ? channelTop + (laneRight.length - 1) * laneGap
+      : maxY
+
+    return {
+      nodes,
+      links,
+      place,
+      secondary,
+      bounds: { minX, maxX, minY, maxY: Math.max(maxY, channelBottom) },
+    }
   }, [members, relationships, orientation])
 
   // Ramo destacado a partir da selecção
@@ -117,7 +180,7 @@ export default function FamilyTree({
       .call(zoomRef.current.transform, transform)
   }, [layout, size])
 
-  const { nodes, links, place } = layout
+  const { nodes, links, place, secondary } = layout
 
   // d3.link generator para curvas suaves. As coordenadas já estão em espaço
   // de ecrã (place() trata da orientação), por isso basta escolher a curva.
@@ -152,9 +215,27 @@ export default function FamilyTree({
           </linearGradient>
         </defs>
         <g ref={gRef}>
-          {/* Ligações da árvore (padrinho primário) — layout tidy, sem cruzamentos.
-              Os co-padrinhos não são desenhados (evita linhas cruzadas); aparecem
-              no painel de perfil de cada membro. */}
+          {/* Ligações de co-padrinho (2.º padrinho) — desenhadas PRIMEIRO, por
+              trás dos nós, encaminhadas por baixo em pistas separadas (sem
+              sobreposições). Roxas tracejadas para se distinguirem das primárias. */}
+          <g fill="none">
+            {secondary.map((e, i) => {
+              const active = branch && branch.has(e.parent_id) && branch.has(e.child_id)
+              return (
+                <path
+                  key={`sec-${i}`}
+                  d={e.d}
+                  stroke={active ? 'url(#branchGrad)' : COLORS.purpleSoft}
+                  strokeWidth={active ? 2.4 : 1.5}
+                  strokeDasharray="6 5"
+                  strokeOpacity={branch && !active ? 0.18 : 0.55}
+                  strokeLinecap="round"
+                />
+              )
+            })}
+          </g>
+
+          {/* Ligações da árvore (padrinho primário) — layout tidy, sem cruzamentos. */}
           <g fill="none">
             {links.map((l, i) => {
               const active = linkActive(l)
