@@ -70,8 +70,8 @@ create policy "members_update_own"
 -- as fotos. Muda o email se o administrador for outro.
 create policy "members_admin_update"
   on public.members for update
-  using ((auth.jwt() ->> 'email') = 'fernandobluego@gmail.com')
-  with check ((auth.jwt() ->> 'email') = 'fernandobluego@gmail.com');
+  using ((auth.jwt() ->> 'email') = 'raulmendes2005@gmail.com')
+  with check ((auth.jwt() ->> 'email') = 'raulmendes2005@gmail.com');
 
 -- Memórias: qualquer autenticado pode escrever; só o autor pode apagar
 create policy "mem_insert_auth"

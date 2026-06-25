@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 
 // Email do administrador — só este utilizador pode editar fotos.
-export const ADMIN_EMAIL = 'fernandobluego@gmail.com'
+export const ADMIN_EMAIL = 'raulmendes2005@gmail.com'
 
 /** Estado de sessão do Supabase. { email, ready, isAdmin } */
 export function useAuth() {

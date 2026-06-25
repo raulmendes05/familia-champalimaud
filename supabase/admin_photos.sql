@@ -6,5 +6,5 @@ drop policy if exists "members_admin_update" on public.members;
 
 create policy "members_admin_update"
   on public.members for update
-  using ((auth.jwt() ->> 'email') = 'fernandobluego@gmail.com')
-  with check ((auth.jwt() ->> 'email') = 'fernandobluego@gmail.com');
+  using ((auth.jwt() ->> 'email') = 'raulmendes2005@gmail.com')
+  with check ((auth.jwt() ->> 'email') = 'raulmendes2005@gmail.com');
