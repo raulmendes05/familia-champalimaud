@@ -2,6 +2,8 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import * as d3 from 'd3'
 import { buildHierarchy, branchOf } from '../utils/tree'
 import { POSITIONS, SCALE, NODE, LINES } from '../data/layout'
+import { FOUNDER_BADGES, isFounder } from '../data/founders'
+import { usePhotos } from '../utils/photos'
 
 const NODE_W = NODE.W
 const NODE_H = NODE.H
@@ -30,8 +32,10 @@ export default function FamilyTree({
   highlightIds = null,
   dimGenerations = null,
   secondaryShown = null,
+  lineageIds = null,
   onSelect = () => {},
 }) {
+  const photos = usePhotos()
   const svgRef = useRef(null)
   const gRef = useRef(null)
   const zoomRef = useRef(null)
@@ -48,6 +52,9 @@ export default function FamilyTree({
     () => (selectedId ? branchOf(selectedId, relationships) : null),
     [selectedId, relationships]
   )
+
+  // Conjunto a destacar: linhagem (se ativa) tem prioridade sobre o ramo.
+  const highlight = lineageIds || branch
 
   // Linhas do 2.º padrinho (co-padrinho) mostradas a pedido pelo painel.
   const secondaryEdges = useMemo(() => {
@@ -92,35 +99,45 @@ export default function FamilyTree({
 
   const nodeState = (d) => {
     const id = d.data.id
-    const inBranch = branch ? branch.has(id) : false
+    const inBranch = highlight ? highlight.has(id) : false
     const isSelected = id === selectedId
     const isSearchHit = highlightIds ? highlightIds.has(id) : false
     const isDimmed =
       (dimGenerations && dimGenerations.has(d.data.member?.generation)) ||
-      (branch && !inBranch) ||
+      (highlight && !inBranch) ||
       (highlightIds && highlightIds.size > 0 && !isSearchHit)
     return { isSelected, inBranch, isSearchHit, isDimmed }
   }
 
+  const linkActive = (l) => highlight && highlight.has(l.source) && highlight.has(l.target)
+
   return (
     <div ref={containerRef} className="relative h-full w-full">
       <svg ref={svgRef} className="h-full w-full cursor-grab active:cursor-grabbing">
+        <defs>
+          <clipPath id="champi-avatar">
+            <circle cx={20} cy={NODE_H / 2} r={13} />
+          </clipPath>
+        </defs>
         <g ref={gRef}>
-          {/* Conectores reais do PDF (ou links do d3 no modo automático) */}
+          {/* Conectores: roxos normais; dourados quando na linhagem/ramo destacado */}
           <g fill="none" strokeLinecap="round" strokeLinejoin="round">
             {lines
               ? lines.map((l, i) => (
-                  <polyline
-                    key={i}
-                    points={l.pts}
-                    stroke={COLORS.purple}
-                    strokeWidth={1.9}
-                    strokeOpacity={branch ? 0.28 : 0.62}
-                  />
+                  <polyline key={i} points={l.pts} stroke={COLORS.purple} strokeWidth={1.9} strokeOpacity={highlight ? 0.22 : 0.62} />
                 ))
-              : links.map((l, i) => (
-                  <path key={i} d={l.d} stroke={COLORS.purple} strokeWidth={1.7} strokeOpacity={branch ? 0.28 : 0.6} />
-                ))}
+              : links.map((l, i) => {
+                  const active = linkActive(l)
+                  return (
+                    <path
+                      key={i}
+                      d={l.d}
+                      stroke={active ? COLORS.gold : COLORS.purple}
+                      strokeWidth={active ? 2.6 : 1.7}
+                      strokeOpacity={highlight && !active ? 0.18 : active ? 0.95 : 0.6}
+                    />
+                  )
+                })}
           </g>
 
           {/* Nós */}
@@ -129,7 +146,15 @@ export default function FamilyTree({
               const p = place(d)
               const m = d.data.member
               const { isSelected, isSearchHit, isDimmed } = nodeState(d)
-              const stroke = isSelected ? COLORS.gold : isSearchHit ? COLORS.purpleSoft : COLORS.line
+              const photo = photos[d.data.id]
+              const founder = isFounder(d.data.id) ? FOUNDER_BADGES[d.data.id] : null
+              const stroke = isSelected
+                ? COLORS.gold
+                : isSearchHit
+                  ? COLORS.purpleSoft
+                  : founder
+                    ? founder.color
+                    : COLORS.line
               return (
                 <g
                   key={d.data.id}
@@ -150,23 +175,41 @@ export default function FamilyTree({
                     stroke={stroke}
                     strokeWidth={isSelected ? 2.5 : 1.4}
                   />
-                  <circle cx={20} cy={NODE_H / 2} r={13} fill={COLORS.ink} stroke={stroke} strokeWidth={1.3} />
-                  <text
-                    x={20}
-                    y={NODE_H / 2 + 4}
-                    textAnchor="middle"
-                    fontSize={12}
-                    fontWeight="700"
-                    fill={isSelected ? COLORS.gold : COLORS.purpleSoft}
-                  >
-                    {(m?.name || m?.nickname || '?').charAt(0)}
-                  </text>
+                  <circle cx={20} cy={NODE_H / 2} r={13} fill={COLORS.ink} />
+                  {photo ? (
+                    <image
+                      href={photo}
+                      x={7}
+                      y={NODE_H / 2 - 13}
+                      width={26}
+                      height={26}
+                      clipPath="url(#champi-avatar)"
+                      preserveAspectRatio="xMidYMid slice"
+                    />
+                  ) : (
+                    <text
+                      x={20}
+                      y={NODE_H / 2 + 4}
+                      textAnchor="middle"
+                      fontSize={12}
+                      fontWeight="700"
+                      fill={isSelected ? COLORS.gold : COLORS.purpleSoft}
+                    >
+                      {(m?.name || m?.nickname || '?').charAt(0)}
+                    </text>
+                  )}
+                  <circle cx={20} cy={NODE_H / 2} r={13} fill="none" stroke={stroke} strokeWidth={1.3} />
                   <text x={38} y={m?.nickname ? 20 : 27} fontSize={11.5} fontWeight="700" fill={COLORS.text}>
                     {truncate(m?.name, 13)}
                   </text>
                   {m?.nickname && (
                     <text x={38} y={33} fontSize={8.5} fill={COLORS.textDim}>
                       {truncate(m.nickname, 17)}
+                    </text>
+                  )}
+                  {founder && (
+                    <text x={NODE_W / 2} y={-7} textAnchor="middle" fontSize={17}>
+                      {founder.emoji}
                     </text>
                   )}
                 </g>
@@ -280,7 +323,11 @@ function autoLayout(members, relationships, orientation) {
   const links = rawLinks.map((l) => {
     const s = place(l.source), t = place(l.target)
     const gen = isVertical ? d3.linkVertical() : d3.linkHorizontal()
-    return { d: gen({ source: [s.x, s.y], target: [t.x, t.y] }) }
+    return {
+      d: gen({ source: [s.x, s.y], target: [t.x, t.y] }),
+      source: l.source.data.id,
+      target: l.target.data.id,
+    }
   })
   let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity
   const posById = new Map()

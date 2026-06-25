@@ -1,5 +1,8 @@
-import { relationsOf } from '../utils/tree'
+import { relationsOf, founderOf } from '../utils/tree'
 import { FACULDADES, memories } from '../data/mockData'
+import { FOUNDER_BADGES } from '../data/founders'
+import FounderBadge from './FounderBadge'
+import { usePhotos } from '../utils/photos'
 
 const TYPE_LABEL = {
   padrinho: 'Padrinho',
@@ -17,13 +20,19 @@ export default function MemberPanel({
   relationships,
   secondaryShown = null,
   onToggleSecondary = () => {},
+  lineageActive = false,
+  onToggleLineage = () => {},
   onSelect,
   onClose,
 }) {
+  const photos = usePhotos()
   if (!member) return null
   const { padrinhos, afilhados, irmaos } = relationsOf(member.id, members, relationships)
   const memberMemories = memories.filter((mm) => mm.member_id === member.id)
   const byId = (id) => members.find((m) => m.id === id)
+  const founderId = founderOf(member.id, relationships)
+  const founder = FOUNDER_BADGES[founderId]
+  const photo = photos[member.id]
 
   // 2.º(s) padrinho(s) — relações verticais não-primárias deste membro
   const VERT = new Set(['padrinho', 'madrinha'])
@@ -53,8 +62,8 @@ export default function MemberPanel({
             className="grid h-16 w-16 place-items-center rounded-full border-2 border-champi-gold
               bg-champi-ink text-2xl font-bold text-champi-gold"
           >
-            {member.photo_url ? (
-              <img src={member.photo_url} alt="" className="h-full w-full rounded-full object-cover" />
+            {photo || member.photo_url ? (
+              <img src={photo || member.photo_url} alt="" className="h-full w-full rounded-full object-cover" />
             ) : (
               (member.name || member.nickname).charAt(0)
             )}
@@ -66,9 +75,10 @@ export default function MemberPanel({
             {member.nickname && (
               <p className="truncate text-sm text-champi-text">“{member.nickname}”</p>
             )}
-            <div className="mt-1 flex flex-wrap gap-1">
+            <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
               <span className="chip">Gen {member.generation}</span>
-              <span className="chip">{member.year_joined}</span>
+              {member.year_joined && <span className="chip">{member.year_joined}</span>}
+              {founder && <FounderBadge founderId={founderId} size={14} showLabel />}
             </div>
           </div>
         </div>
@@ -85,6 +95,20 @@ export default function MemberPanel({
         <Field label="Curso" value={member.course} />
         <Field label="Faculdade" value={FACULDADES[member.faculty] || member.faculty} />
         {member.bio && <Field label="Sobre" value={member.bio} />}
+
+        <button
+          onClick={() => onToggleLineage(member.id)}
+          className={`flex w-full items-center justify-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition ${
+            lineageActive
+              ? 'border-champi-purple bg-champi-purple/20 text-champi-purple-soft'
+              : 'border-champi-purple/50 text-champi-purple-soft hover:bg-champi-purple/10'
+          }`}
+        >
+          <span className="text-base leading-none">🧬</span>
+          {lineageActive
+            ? 'Esconder linhagem'
+            : `Ver linhagem${founder ? ` (até ${founder.label})` : ''}`}
+        </button>
 
         <RelGroup title="Padrinhos" items={padrinhos} onSelect={onSelect} />
 

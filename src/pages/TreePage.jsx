@@ -4,6 +4,7 @@ import MemberPanel from '../components/MemberPanel'
 import SearchBar from '../components/SearchBar'
 import Stats from '../components/Stats'
 import { useMembers } from '../hooks/useMembers'
+import { lineageOf } from '../utils/tree'
 
 export default function TreePage() {
   const { members, relationships, loading } = useMembers()
@@ -13,11 +14,19 @@ export default function TreePage() {
   const [dimGenerations, setDimGenerations] = useState(null)
   const [showPanels, setShowPanels] = useState(true)
   const [secondaryShown, setSecondaryShown] = useState(() => new Set())
+  const [lineageId, setLineageId] = useState(null)
 
   const handleSelect = (m) => {
     setSelected(m)
     setSearchIds(null)
+    setLineageId(null)
   }
+
+  const lineageIds = useMemo(
+    () => (lineageId ? new Set(lineageOf(lineageId, relationships)) : null),
+    [lineageId, relationships]
+  )
+  const toggleLineage = (id) => setLineageId((cur) => (cur === id ? null : id))
 
   const toggleSecondary = (id) =>
     setSecondaryShown((prev) => {
@@ -68,6 +77,7 @@ export default function TreePage() {
         highlightIds={searchIds}
         dimGenerations={dimGenerations}
         secondaryShown={secondaryShown}
+        lineageIds={lineageIds}
         onSelect={handleSelect}
       />
 
@@ -111,6 +121,8 @@ export default function TreePage() {
         relationships={relationships}
         secondaryShown={secondaryShown}
         onToggleSecondary={toggleSecondary}
+        lineageActive={lineageId === selected?.id}
+        onToggleLineage={toggleLineage}
         onSelect={setSelected}
         onClose={() => setSelected(null)}
       />

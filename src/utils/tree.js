@@ -163,6 +163,38 @@ export function branchOf(memberId, relationships) {
   return branch
 }
 
+/**
+ * Linhagem de um membro: sobe pelos padrinhos PRIMÁRIOS até ao fundador.
+ * Devolve um array ordenado [fundador, …, membro].
+ */
+export function lineageOf(memberId, relationships) {
+  const primaryOf = new Map()
+  for (const r of relationships) {
+    if (!VERTICAL_TYPES.has(r.type)) continue
+    if (r.is_primary && !primaryOf.has(r.child_id)) primaryOf.set(r.child_id, r.parent_id)
+  }
+  for (const r of relationships) {
+    if (!VERTICAL_TYPES.has(r.type)) continue
+    if (!primaryOf.has(r.child_id)) primaryOf.set(r.child_id, r.parent_id)
+  }
+  const path = [memberId]
+  const seen = new Set([memberId])
+  let cur = memberId
+  while (primaryOf.has(cur)) {
+    const p = primaryOf.get(cur)
+    if (seen.has(p)) break
+    path.unshift(p)
+    seen.add(p)
+    cur = p
+  }
+  return path
+}
+
+/** Fundador de quem o membro descende (topo da linhagem primária). */
+export function founderOf(memberId, relationships) {
+  return lineageOf(memberId, relationships)[0]
+}
+
 /** Relações directas de um membro, agrupadas para o painel de perfil. */
 export function relationsOf(memberId, members, relationships) {
   const byId = indexMembers(members)

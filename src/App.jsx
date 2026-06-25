@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import Navbar from './components/Navbar'
 import TreePage from './pages/TreePage'
 import MembersPage from './pages/MembersPage'
+import GenerationsPage from './pages/GenerationsPage'
 import LoginPage from './pages/LoginPage'
 
 export default function App() {
@@ -12,6 +13,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<TreePage />} />
           <Route path="/membros" element={<MembersPage />} />
+          <Route path="/geracoes" element={<GenerationsPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

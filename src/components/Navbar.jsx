@@ -27,6 +27,9 @@ export default function Navbar() {
         <NavLink to="/membros" className={linkClass}>
           Membros
         </NavLink>
+        <NavLink to="/geracoes" className={linkClass}>
+          Gerações
+        </NavLink>
         <NavLink to="/login" className={linkClass}>
           Entrar
         </NavLink>
