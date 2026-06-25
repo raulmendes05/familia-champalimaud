@@ -12,11 +12,19 @@ export default function TreePage() {
   const [searchIds, setSearchIds] = useState(null)
   const [dimGenerations, setDimGenerations] = useState(null)
   const [showPanels, setShowPanels] = useState(true)
+  const [secondaryShown, setSecondaryShown] = useState(() => new Set())
 
   const handleSelect = (m) => {
     setSelected(m)
     setSearchIds(null)
   }
+
+  const toggleSecondary = (id) =>
+    setSecondaryShown((prev) => {
+      const next = new Set(prev)
+      next.has(id) ? next.delete(id) : next.add(id)
+      return next
+    })
 
   if (loading) {
     return (
@@ -38,6 +46,7 @@ export default function TreePage() {
         selectedId={selected?.id || null}
         highlightIds={searchIds}
         dimGenerations={dimGenerations}
+        secondaryShown={secondaryShown}
         onSelect={handleSelect}
       />
 
@@ -73,6 +82,8 @@ export default function TreePage() {
         member={selected}
         members={members}
         relationships={relationships}
+        secondaryShown={secondaryShown}
+        onToggleSecondary={toggleSecondary}
         onSelect={setSelected}
         onClose={() => setSelected(null)}
       />

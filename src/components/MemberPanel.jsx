@@ -11,11 +11,27 @@ const TYPE_LABEL = {
  * Painel lateral com o perfil do membro selecionado.
  * Props: member, members, relationships, onSelect(member), onClose()
  */
-export default function MemberPanel({ member, members, relationships, onSelect, onClose }) {
+export default function MemberPanel({
+  member,
+  members,
+  relationships,
+  secondaryShown = null,
+  onToggleSecondary = () => {},
+  onSelect,
+  onClose,
+}) {
   if (!member) return null
   const { padrinhos, afilhados, irmaos } = relationsOf(member.id, members, relationships)
   const memberMemories = memories.filter((mm) => mm.member_id === member.id)
   const byId = (id) => members.find((m) => m.id === id)
+
+  // 2.º(s) padrinho(s) — relações verticais não-primárias deste membro
+  const VERT = new Set(['padrinho', 'madrinha'])
+  const secondParents = relationships
+    .filter((r) => VERT.has(r.type) && r.child_id === member.id && !r.is_primary)
+    .map((r) => byId(r.parent_id))
+    .filter(Boolean)
+  const secondaryOn = secondaryShown ? secondaryShown.has(member.id) : false
 
   return (
     <aside
@@ -71,6 +87,23 @@ export default function MemberPanel({ member, members, relationships, onSelect, 
         {member.bio && <Field label="Sobre" value={member.bio} />}
 
         <RelGroup title="Padrinhos" items={padrinhos} onSelect={onSelect} />
+
+        {secondParents.length > 0 && (
+          <button
+            onClick={() => onToggleSecondary(member.id)}
+            className={`flex w-full items-center justify-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition ${
+              secondaryOn
+                ? 'border-champi-gold bg-champi-gold/15 text-champi-gold'
+                : 'border-champi-gold/50 text-champi-gold hover:bg-champi-gold/10'
+            }`}
+          >
+            <span className="text-base leading-none">{secondaryOn ? '✓' : '＋'}</span>
+            {secondaryOn
+              ? 'Esconder 2.º padrinho na árvore'
+              : `Mostrar 2.º padrinho na árvore (${secondParents.map((p) => p.name).join(', ')})`}
+          </button>
+        )}
+
         <RelGroup title="Afilhados" items={afilhados} onSelect={onSelect} />
         <RelGroup title="Irmãos de praxe" items={irmaos} onSelect={onSelect} />
 

@@ -29,6 +29,7 @@ export default function FamilyTree({
   selectedId = null,
   highlightIds = null,
   dimGenerations = null,
+  secondaryShown = null,
   onSelect = () => {},
 }) {
   const svgRef = useRef(null)
@@ -37,18 +38,31 @@ export default function FamilyTree({
   const [size, setSize] = useState({ width: 800, height: 600 })
   const containerRef = useRef(null)
 
-  // single = mostrar só o padrinho PRINCIPAL (árvore limpa, sem cruzamentos)
-  const [single, setSingle] = useState(false)
-
-  const layout = useMemo(() => {
-    const usingFixed = !single && members.length > 0 && members.every((m) => POSITIONS[m.id])
-    return usingFixed ? fixedLayout(members) : autoLayout(members, relationships, orientation)
-  }, [members, relationships, orientation, single])
+  // Árvore tidy (só padrinho principal) — limpa, sem cruzamentos.
+  const layout = useMemo(
+    () => autoLayout(members, relationships, orientation),
+    [members, relationships, orientation]
+  )
 
   const branch = useMemo(
     () => (selectedId ? branchOf(selectedId, relationships) : null),
     [selectedId, relationships]
   )
+
+  // Linhas do 2.º padrinho (co-padrinho) mostradas a pedido pelo painel.
+  const secondaryEdges = useMemo(() => {
+    if (!secondaryShown || secondaryShown.size === 0) return []
+    const VERT = new Set(['padrinho', 'madrinha'])
+    const out = []
+    for (const r of relationships) {
+      if (!VERT.has(r.type) || r.is_primary) continue
+      if (!secondaryShown.has(r.child_id)) continue
+      const s = layout.posById.get(r.parent_id)
+      const t = layout.posById.get(r.child_id)
+      if (s && t) out.push({ s, t, key: `${r.parent_id}>${r.child_id}` })
+    }
+    return out
+  }, [secondaryShown, relationships, layout])
 
   useEffect(() => {
     if (!containerRef.current) return
@@ -159,23 +173,28 @@ export default function FamilyTree({
               )
             })}
           </g>
+
+          {/* Linha(s) do 2.º padrinho (mostradas a pedido pelo painel) —
+              por cima de tudo, dourado tracejado, claramente um destaque. */}
+          {secondaryEdges.length > 0 && (
+            <g fill="none">
+              {secondaryEdges.map((e) => {
+                const my = (e.s.y + e.t.y) / 2
+                return (
+                  <path
+                    key={e.key}
+                    d={`M ${e.s.x} ${e.s.y} C ${e.s.x} ${my} ${e.t.x} ${my} ${e.t.x} ${e.t.y}`}
+                    stroke={COLORS.gold}
+                    strokeWidth={2.6}
+                    strokeDasharray="7 5"
+                    strokeOpacity={0.95}
+                  />
+                )
+              })}
+            </g>
+          )}
         </g>
       </svg>
-
-      {/* Alternar: réplica do PDF (todos os padrinhos) ↔ só padrinho principal */}
-      <button
-        onClick={() => setSingle((s) => !s)}
-        title={single ? 'A mostrar só o padrinho principal de cada pessoa' : 'A mostrar todos os padrinhos (réplica do PDF)'}
-        className={`absolute left-4 top-4 flex items-center gap-2 rounded-full border px-3.5 py-2 text-sm font-medium
-          backdrop-blur transition ${
-            single
-              ? 'border-champi-gold/60 bg-champi-gold/15 text-champi-gold'
-              : 'border-champi-line bg-champi-ink-3/80 text-champi-text hover:border-champi-gold/50'
-          }`}
-      >
-        <span className={`h-2.5 w-2.5 rounded-full ${single ? 'bg-champi-gold' : 'bg-champi-purple'}`} />
-        {single ? 'Só padrinho principal' : 'Todos os padrinhos'}
-      </button>
 
       <div className="absolute bottom-4 right-4 flex flex-col gap-1.5">
         <ZoomBtn label="+" onClick={() => zoomBy(svgRef, zoomRef, 1.3)} />
@@ -264,12 +283,14 @@ function autoLayout(members, relationships, orientation) {
     return { d: gen({ source: [s.x, s.y], target: [t.x, t.y] }) }
   })
   let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity
+  const posById = new Map()
   for (const n of nodes) {
     const p = place(n)
+    posById.set(n.data.id, p)
     minX = Math.min(minX, p.x); maxX = Math.max(maxX, p.x)
     minY = Math.min(minY, p.y); maxY = Math.max(maxY, p.y)
   }
-  return { nodes, lines: null, links, place, bounds: { minX, maxX, minY, maxY } }
+  return { nodes, lines: null, links, place, posById, bounds: { minX, maxX, minY, maxY } }
 }
 
 function fitToView(svgRef, zoomRef, layout, size, duration) {
