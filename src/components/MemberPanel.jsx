@@ -32,6 +32,7 @@ export default function MemberPanel({
   const byId = (id) => members.find((m) => m.id === id)
   const founderId = founderOf(member.id, relationships)
   const founder = FOUNDER_BADGES[founderId]
+  const founderName = byId(founderId)?.name || founder?.label
   const photo = photos[member.id]
 
   // 2.º(s) padrinho(s) — relações verticais não-primárias deste membro
@@ -107,7 +108,7 @@ export default function MemberPanel({
           <span className="text-base leading-none">🧬</span>
           {lineageActive
             ? 'Esconder linhagem'
-            : `Ver linhagem${founder ? ` (até ${founder.label})` : ''}`}
+            : `Ver linhagem${founderName ? ` (até ${founderName})` : ''}`}
         </button>
 
         <RelGroup title="Padrinhos" items={padrinhos} onSelect={onSelect} />
