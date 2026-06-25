@@ -96,9 +96,9 @@ export default function FamilyTree({
                   <polyline
                     key={i}
                     points={l.pts}
-                    stroke={l.c}
-                    strokeWidth={2}
-                    strokeOpacity={branch ? 0.4 : 0.92}
+                    stroke={COLORS.purple}
+                    strokeWidth={1.9}
+                    strokeOpacity={branch ? 0.28 : 0.62}
                   />
                 ))
               : links.map((l, i) => (
@@ -174,10 +174,52 @@ function fixedLayout(members) {
     const [rx, ry] = POSITIONS[m.id]
     return { data: { id: m.id, member: m }, x: rx * SCALE, y: ry * SCALE }
   })
-  const lines = LINES.map((l) => ({
-    c: l.c,
-    pts: l.p.map(([x, y]) => `${(x * SCALE).toFixed(1)},${(y * SCALE).toFixed(1)}`).join(' '),
-  }))
+  const centers = nodes.map((n) => ({ id: n.data.id, x: n.x, y: n.y }))
+  const scaled = LINES.map((l) => l.p.map(([x, y]) => [x * SCALE, y * SCALE]))
+  const connected = new Set()
+
+  // Passagem 1 — liga cada extremidade ao nó que está MESMO em frente (na
+  // direção da própria linha), fechando o espaço até à caixa.
+  const SNAP_MAX = 100, PERP = 52
+  const snapDirectional = (E, NB) => {
+    const dx = E[0] - NB[0], dy = E[1] - NB[1]
+    const len = Math.hypot(dx, dy) || 1
+    const ux = dx / len, uy = dy / len
+    let best = null, bestAlong = SNAP_MAX
+    for (const c of centers) {
+      const vx = c.x - E[0], vy = c.y - E[1]
+      const along = vx * ux + vy * uy
+      if (along <= 0 || along > SNAP_MAX) continue
+      if (Math.abs(vx * uy - vy * ux) > PERP) continue
+      if (along < bestAlong) { bestAlong = along; best = c }
+    }
+    return best
+  }
+  for (const sc of scaled) {
+    if (sc.length < 2) continue
+    for (const [i, j] of [[0, 1], [sc.length - 1, sc.length - 2]]) {
+      const hit = snapDirectional(sc[i], sc[j])
+      if (hit) { sc[i] = [hit.x, hit.y]; connected.add(hit.id) }
+    }
+  }
+
+  // Passagem 2 — para nós ainda sem ligação (fundadores com foto grande, etc.),
+  // estica até eles a ponta de linha colinear mais próxima.
+  for (const c of centers) {
+    if (connected.has(c.id)) continue
+    let bestRef = null, bestD = Infinity
+    for (const sc of scaled) {
+      for (const i of [0, sc.length - 1]) {
+        const E = sc[i]
+        const d = Math.hypot(E[0] - c.x, E[1] - c.y)
+        const collinear = Math.abs(E[0] - c.x) < 30 && Math.abs(E[1] - c.y) < 280
+        if ((d < 95 || collinear) && d < bestD) { bestD = d; bestRef = [sc, i] }
+      }
+    }
+    if (bestRef) { bestRef[0][bestRef[1]] = [c.x, c.y]; connected.add(c.id) }
+  }
+
+  const lines = scaled.map((sc) => ({ pts: sc.map((p) => `${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(' ') }))
 
   let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity
   const seen = (x, y) => {
