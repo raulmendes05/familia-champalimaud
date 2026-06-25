@@ -212,11 +212,12 @@ const GENERATION = {
   ping: 1, jajonhe: 1, grizo: 1, hugo: 1,
   // Geração 2
   carvalheira: 2, gomes: 2, piri: 2, bras: 2, clara: 2, pedro: 2, vasco: 2,
-  rodolfo: 2, cesar: 2, maria_p: 2, henrique: 2, maria_costa: 2, andreia: 2,
+  rodolfo: 2, cesar: 2, henrique: 2, maria_costa: 2, andreia: 2,
   leonor_mendes: 2,
   // Geração 3
   vartels: 3, joao_dias: 3, moguels: 3, caco: 3, tildes: 3, marta: 3, pippo: 3,
   tommy: 3, mike: 3, tomas_h: 3, maravilha: 3, sissi: 3, binga: 3, ze_cordeiro: 3,
+  maria_p: 3,
   // Geração 4
   munha: 4, ximenes: 4, rui_jorge: 4, gabriel: 4, migueleo: 4, bia_l: 4, gabi: 4,
   carol: 4, dinis: 4, joana: 4, laura: 4, rita_c: 4, gui_s: 4, ines_a: 4, carmo: 4,

@@ -43,7 +43,7 @@ insert into public.members (id, name, nickname, generation) values
   ('vasco', 'Vasco', 'Isqueiro', 2),
   ('rodolfo', 'Rodolfo', 'Comilão', 2),
   ('cesar', 'César', 'Inem', 2),
-  ('maria_p', 'Maria P.', 'Delay', 2),
+  ('maria_p', 'Maria P.', 'Delay', 3),
   ('tommy', 'Tommy', 'Eminem da Praxe', 3),
   ('mike', 'Mike', 'GPS', 3),
   ('sassa', 'Sassa', 'MC Completo', 4),
