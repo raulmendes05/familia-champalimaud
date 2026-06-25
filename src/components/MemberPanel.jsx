@@ -40,14 +40,16 @@ export default function MemberPanel({ member, members, relationships, onSelect, 
             {member.photo_url ? (
               <img src={member.photo_url} alt="" className="h-full w-full rounded-full object-cover" />
             ) : (
-              (member.nickname || member.name).charAt(0)
+              (member.name || member.nickname).charAt(0)
             )}
           </div>
           <div className="min-w-0">
             <p className="font-display text-2xl font-semibold leading-tight text-champi-gold">
-              {member.nickname}
+              {member.name}
             </p>
-            <p className="truncate text-sm text-champi-text">{member.name}</p>
+            {member.nickname && (
+              <p className="truncate text-sm text-champi-text">“{member.nickname}”</p>
+            )}
             <div className="mt-1 flex flex-wrap gap-1">
               <span className="chip">Gen {member.generation}</span>
               <span className="chip">{member.year_joined}</span>
@@ -82,7 +84,7 @@ export default function MemberPanel({ member, members, relationships, onSelect, 
                 <li key={mm.id} className="rounded-lg bg-champi-ink-3/60 p-3 text-sm text-champi-text">
                   <p className="italic">“{mm.text}”</p>
                   <p className="mt-1 text-xs text-champi-text-dim">
-                    — {byId(mm.author_id)?.nickname || 'Anónimo'}
+                    — {byId(mm.author_id)?.name || 'Anónimo'}
                   </p>
                 </li>
               ))}
@@ -119,7 +121,7 @@ function RelGroup({ title, items, onSelect }) {
             title={TYPE_LABEL[type]}
             className="chip transition hover:border-champi-gold/70 hover:text-champi-gold"
           >
-            {m.nickname}
+            {m.name}
           </button>
         ))}
       </div>

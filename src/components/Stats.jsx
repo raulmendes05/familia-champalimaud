@@ -53,7 +53,7 @@ export default function Stats({ members, relationships, onSelect }) {
                     onClick={() => onSelect(byId(id))}
                     className="rounded px-1 text-champi-purple-soft hover:text-champi-gold"
                   >
-                    {byId(id)?.nickname}
+                    {byId(id)?.name}
                   </button>
                   {i < result.path.length - 1 && <span className="text-champi-text-dim">→</span>}
                 </span>
@@ -90,7 +90,8 @@ function Select({ members, value, onChange, placeholder }) {
       <option value="">{placeholder}</option>
       {members.map((m) => (
         <option key={m.id} value={m.id}>
-          {m.nickname} · {m.name}
+          {m.name}
+          {m.nickname ? ` · ${m.nickname}` : ''}
         </option>
       ))}
     </select>

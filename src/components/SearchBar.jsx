@@ -78,8 +78,8 @@ export default function SearchBar({ members, onResults, onPickGeneration, onSele
                   text-sm hover:bg-champi-ink-3/70"
               >
                 <span className="text-champi-text">
-                  <span className="font-semibold text-champi-gold">{m.nickname}</span>{' '}
-                  <span className="text-champi-text-dim">· {m.name}</span>
+                  <span className="font-semibold text-champi-gold">{m.name}</span>
+                  {m.nickname && <span className="text-champi-text-dim"> · {m.nickname}</span>}
                 </span>
                 <span className="chip">Gen {m.generation}</span>
               </button>

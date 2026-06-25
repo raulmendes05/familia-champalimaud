@@ -32,6 +32,7 @@ create table if not exists public.relationships (
   parent_id  text not null references public.members(id) on delete cascade,
   child_id   text not null references public.members(id) on delete cascade,
   type       text not null check (type in ('padrinho', 'madrinha', 'irmao')),
+  is_primary boolean not null default true,  -- padrinho principal (define a árvore)
   created_at timestamptz not null default now(),
   unique (parent_id, child_id, type)
 );

@@ -11,21 +11,40 @@ export function indexMembers(members) {
 }
 
 /**
- * Constrói uma hierarquia (forest → single root virtual) a partir das
- * relações padrinho/madrinha. Devolve `{ id: '__root__', children: [...] }`
+ * Para cada afilhado escolhe UM padrinho primário (a árvore é uma hierarquia,
+ * não um grafo). Preferência: relação com is_primary === true; senão a primeira
+ * relação vertical encontrada para esse filho. Devolve Map child → parent.
+ */
+function primaryParentMap(members, relationships) {
+  const byId = indexMembers(members)
+  const primary = new Map()
+  // 1ª passagem: as marcadas como primárias
+  for (const r of relationships) {
+    if (!VERTICAL_TYPES.has(r.type)) continue
+    if (!byId.has(r.parent_id) || !byId.has(r.child_id)) continue
+    if (r.is_primary && !primary.has(r.child_id)) primary.set(r.child_id, r.parent_id)
+  }
+  // 2ª passagem: preencher quem ficou sem primário com a primeira relação
+  for (const r of relationships) {
+    if (!VERTICAL_TYPES.has(r.type)) continue
+    if (!byId.has(r.parent_id) || !byId.has(r.child_id)) continue
+    if (!primary.has(r.child_id)) primary.set(r.child_id, r.parent_id)
+  }
+  return primary
+}
+
+/**
+ * Constrói uma hierarquia (forest → single root virtual) usando apenas o
+ * padrinho PRIMÁRIO de cada membro. Devolve `{ id: '__root__', children: [...] }`
  * pronto para `d3.hierarchy`.
  */
 export function buildHierarchy(members, relationships) {
   const byId = indexMembers(members)
+  const primary = primaryParentMap(members, relationships)
   const childrenOf = new Map() // parentId → [childId]
-  const hasParent = new Set()
-
-  for (const r of relationships) {
-    if (!VERTICAL_TYPES.has(r.type)) continue
-    if (!byId.has(r.parent_id) || !byId.has(r.child_id)) continue
-    if (!childrenOf.has(r.parent_id)) childrenOf.set(r.parent_id, [])
-    childrenOf.get(r.parent_id).push(r.child_id)
-    hasParent.add(r.child_id)
+  for (const [child, parent] of primary) {
+    if (!childrenOf.has(parent)) childrenOf.set(parent, [])
+    childrenOf.get(parent).push(child)
   }
 
   const build = (id) => {
@@ -34,10 +53,27 @@ export function buildHierarchy(members, relationships) {
     return { id, member, children: kids }
   }
 
-  // raízes = membros sem padrinho
-  const roots = members.filter((m) => !hasParent.has(m.id)).map((m) => build(m.id))
+  // raízes = membros sem padrinho primário (os fundadores)
+  const roots = members.filter((m) => !primary.has(m.id)).map((m) => build(m.id))
 
   return { id: '__root__', member: null, children: roots }
+}
+
+/**
+ * Ligações de co-padrinho/madrinha (todas as verticais que NÃO são a primária
+ * do filho). Desenhadas como linhas extra na árvore. Devolve [{parent_id, child_id, type}].
+ */
+export function secondaryParentEdges(members, relationships) {
+  const byId = indexMembers(members)
+  const primary = primaryParentMap(members, relationships)
+  const extra = []
+  for (const r of relationships) {
+    if (!VERTICAL_TYPES.has(r.type)) continue
+    if (!byId.has(r.parent_id) || !byId.has(r.child_id)) continue
+    if (primary.get(r.child_id) === r.parent_id) continue // é a primária
+    extra.push({ parent_id: r.parent_id, child_id: r.child_id, type: r.type })
+  }
+  return extra
 }
 
 /**
@@ -91,30 +127,36 @@ export function degreesOfSeparation(adj, fromId, toId) {
  * destacar a linhagem na árvore.
  */
 export function branchOf(memberId, relationships) {
-  const parentOf = new Map() // child → parent
+  const parentsOf = new Map() // child → [parents]  (inclui co-padrinhos)
   const childrenOf = new Map()
   for (const r of relationships) {
     if (!VERTICAL_TYPES.has(r.type)) continue
-    parentOf.set(r.child_id, r.parent_id)
+    if (!parentsOf.has(r.child_id)) parentsOf.set(r.child_id, [])
+    parentsOf.get(r.child_id).push(r.parent_id)
     if (!childrenOf.has(r.parent_id)) childrenOf.set(r.parent_id, [])
     childrenOf.get(r.parent_id).push(r.child_id)
   }
 
   const branch = new Set([memberId])
-  // antepassados
-  let p = parentOf.get(memberId)
-  while (p) {
-    branch.add(p)
-    p = parentOf.get(p)
+  // antepassados (todos os padrinhos, a subir)
+  const up = [memberId]
+  while (up.length) {
+    const cur = up.pop()
+    for (const p of parentsOf.get(cur) || []) {
+      if (!branch.has(p)) {
+        branch.add(p)
+        up.push(p)
+      }
+    }
   }
-  // descendentes (DFS)
-  const stack = [memberId]
-  while (stack.length) {
-    const cur = stack.pop()
+  // descendentes (a descer a partir do membro)
+  const down = [memberId]
+  while (down.length) {
+    const cur = down.pop()
     for (const c of childrenOf.get(cur) || []) {
       if (!branch.has(c)) {
         branch.add(c)
-        stack.push(c)
+        down.push(c)
       }
     }
   }

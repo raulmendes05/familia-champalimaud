@@ -1,11 +1,11 @@
-// Dados da Família Champalimaud — transcritos da árvore genealógica real (PDF).
+// Dados da Família Champalimaud — transcritos da árvore real e corrigidos pelo Raul.
 // Espelham o esquema do Supabase (tabelas `members`, `relationships`, `memories`).
 //
-// NOTA: `name` = nome/apelido de curso; `nickname` = alcunha de praxe (entre aspas no PDF).
-// Curso/faculdade/ano ficam por preencher — podem ser editados depois (via Supabase).
-//
-// ⚠️ As LIGAÇÕES (quem é padrinho/madrinha de quem) são a minha melhor leitura da
-// árvore. Algumas podem precisar de correção — vê a lista PARENT_CHILDREN no fim.
+// • `name`     = nome próprio / de curso (aparece em DESTAQUE)
+// • `nickname` = alcunha de praxe (mais pequena; pode ser vazia, ex.: Piri)
+// • Apenas 4 fundadores: Ping, Jajonhe, Grizo, Hugo.
+// • Há membros com DOIS padrinhos (co-padrinhos) — o 1.º listado é o "primário"
+//   (define a posição na árvore e a geração); o 2.º é desenhado como ligação extra.
 
 export const FACULDADES = {
   FCT: 'Faculdade de Ciências e Tecnologia',
@@ -14,118 +14,218 @@ export const FACULDADES = {
   FM: 'Faculdade de Medicina',
 }
 
-// Membros: { id, name, nickname, generation }  (+ campos vazios prontos para editar)
-const M = [
-  // ── Geração 0 — fundadores / topo da árvore ──────────────────
-  ['ping', 'Ping', 'T-Rex Gregossauro', 0],
-  ['jajonhe', 'Jajonhe', 'Tropas', 0],
-  ['grizo', 'Grizo', 'Burlão', 0],
-  ['hugo', 'Hugo', 'Donald', 0],
-  ['vasco', 'Vasco', 'Isqueiro', 0],
-  ['leonor_mendes', 'Leonor Mendes', 'Caloirra Frrancesa', 0],
-  ['rui_jorge', 'Rui Jorge', 'Dora', 0],
-  ['cesar', 'César', 'Inem', 0],
-  ['rodolfo', 'Rodolfo', 'Comilão', 0],
+const FOUNDERS = ['ping', 'jajonhe', 'grizo', 'hugo']
 
-  // ── Ramo PING ────────────────────────────────────────────────
-  ['carvalheira', 'Carvalheira', 'Mãe Estou Solteiro', 1],
-  ['gomes', 'Gomes', 'O Incrível Hulkoiro', 1],
-  ['ze_cordeiro', 'Zé Cordeiro', 'Zé Curriqueiro Follow The Leader', 1],
-  ['gabriel', 'Gabriel', 'Picha', 2],
-  ['joao_dias', 'João Dias', 'Rocha Mole', 2],
-  ['vartels', 'Vartels', 'Tintim', 2],
-  ['vaz', 'Vaz', 'Sou-Bi-Ónico', 3],
-  ['matilde_neves', 'Matilde Neves', 'Apóstolo 12 e Meio', 3],
-  ['maria_castro', 'Maria Castro', '', 3],
-  ['raul', 'Raul', 'Maré', 4],
-  ['joaozinho', 'Joãozinho', 'Joãozinho Joãozinho Joãozinho', 4],
-  ['porto', 'Porto', 'Sou um Piço', 4],
-  ['catarina', 'Catarina', 'Kirk Kat', 5],
-  ['estrela', 'Estrela', 'O Máiore', 5],
-
-  // ── Ramo JAJONHE ─────────────────────────────────────────────
-  ['piri', 'Piri', '', 1],
-  ['bras', 'Brás', 'Morcelas', 1],
-  ['pedro', 'Pedro', 'Edro', 1],
-  ['clara', 'Clara', 'Pardalita', 1],
-  ['moguels', 'Moguels', 'Vaquinha', 2],
-  ['caco', 'Caço', 'Setaque', 2],
-  ['ines_costa', 'Inês Costa', 'Fábio Coentrão', 3],
-  ['sofia_pascoa', 'Sofia Páscoa', '', 3],
-  ['ines_barbeiro', 'Inês Barbeiro', '', 3],
-  ['matilde_conde', 'Matilde Conde', 'Macaquinha das Badtrips', 4],
-  ['tiago_soares', 'Tiago Soares', '', 4],
-  ['migueleo', 'Migueleo', 'Miguélio 50 Pontos', 5],
-  ['laura', 'Laura', 'Petite Girly Pop', 5],
-  ['tildes', 'Tildes', 'Inspetora Mini', 5],
-  ['bia_l', 'Bia L.', '', 5],
-  ['marta', 'Marta', '', 5],
-  ['pippo', 'Pippo', 'Triângulo Otis', 5],
-  ['eva', 'Eva', 'Eva Gina Flor', 6],
-  ['matilde_roque', 'Matilde Roque', '', 6],
-  ['ana', 'Ana', '', 6],
-  ['kika_moreira', 'Kika Moreira', '', 6],
-  ['martina', 'Martina', 'Martini', 6],
-  ['leti', 'Leti', 'Lanches', 6],
-  ['nanda', 'Nanda', 'A Careca dum Calvo que Parece o Rabo dum Macaco', 7],
-  ['matilde_alves', 'Matilde Alves', 'Karpa Flávia: A Falhada', 6],
-  ['kika_rocha', 'Kika Rocha', '', 6],
-  ['luisa', 'Luísa', 'Monstrinho do Álcool', 6],
-  ['mini_rita', 'Mini Rita', 'Kréu', 6],
-
-  // ── Ramo VASCO ───────────────────────────────────────────────
-  ['tommy', 'Tommy / Tomé', 'Eminem da Praxe', 1],
-  ['gui_s', 'Gui S.', 'Guilidades o Caloiro Amor da Minha Vida', 1],
-
-  // ── Ramo LEONOR MENDES ───────────────────────────────────────
-  ['binga', 'Binga', 'Chambingo', 1],
-  ['rita_c', 'Rita C.', 'Frigorífico', 1],
-  ['ines_a', 'Inês A.', 'Jonick', 1],
-  ['raquel', 'Raquel', 'Minar-te-ei', 2],
-  ['tita', 'Tita', '', 2],
-  ['sofia_l', 'Sofia L.', 'Sofia Solista', 2],
-  ['rita_pais', 'Rita Pais', 'Padeira de Campolide de Gelatina Quedas Torera', 2],
-  ['barriga', 'Barriga', "Belly's", 2],
-  ['rui_g', 'Rui G.', 'Machupão Alfa', 3],
-  ['carol', 'Carol', 'Letxícia', 4],
-  ['joana', 'Joana', 'Bombas', 4],
-  ['dinis', 'Dinis', 'Charlotte', 4],
-  ['guilherme', 'Guilherme', 'Caloiro do Coito', 5],
-  ['leonor_catarino', 'Leonor Catarino', 'Octavia', 5],
-
-  // ── Ramo RODOLFO ─────────────────────────────────────────────
-  ['mike', 'Mike', 'GPS', 1],
-  ['sassa', 'Sassa', 'MC Completo', 1],
-  ['mota', 'Mota', 'Angélico', 1],
-  ['neves', 'Neves', 'Caloiro 123', 2],
-  ['maquina', 'Máquina', 'Máquina do Álcool', 2],
-
-  // ── Ramo GRIZO ───────────────────────────────────────────────
-  ['munha', 'Munhá', 'Varão', 1],
-  ['henrique', 'Henrique', 'Phenrique', 1],
-  ['maria_p', 'Maria P.', 'Delay', 2],
-  ['maravilha', 'Maravilha', 'Pirata Rabolho', 2],
-  ['tomas_h', 'Tomás H.', 'Grito', 2],
-  ['susi', 'Susi', "Fiambre d'Atum", 2],
-  ['tomas_m', 'Tomás M.', 'Caloirinho D.T.T.', 2],
-  ['gabi', 'Gabi', 'Camões', 3],
-  ['sara', 'Sara', 'Ladrona Ultras Autotuna', 3],
-  ['morgana', 'Morgana', 'Unísono', 3],
-
-  // ── Ramo HUGO ────────────────────────────────────────────────
-  ['andreia', 'Andreia', 'Kréu', 1],
-  ['maria', 'Maria', '', 1],
-  ['ximenes', 'Ximenes', 'Palma Bigots X-Men Calvo', 1],
-  ['sissi', 'Sissi', '', 2],
-  ['carmo', 'Carmo', 'Ca...Clara', 2],
-  ['timi', 'Timi', 'Perna de Pau Médio Mal Passado', 3],
+// [id, nome, alcunha]
+const NAMES = [
+  ['ping', 'Ping', 'T-Rex Gregossauro'],
+  ['jajonhe', 'Jajonhe', 'Tropas'],
+  ['grizo', 'Grizo', 'Burlão'],
+  ['hugo', 'Hugo', 'Donald'],
+  ['carvalheira', 'Carvalheira', 'Mãe Estou Solteiro'],
+  ['gomes', 'Gomes', 'O Incrível Hulkoiro'],
+  ['piri', 'Piri', ''],
+  ['bras', 'Brás', 'Morcelas'],
+  ['clara', 'Clara', 'Pardalita'],
+  ['ze_cordeiro', 'Zé Cordeiro', 'Zé Curriqueiro Follow The Leader'],
+  ['pedro', 'Pedro', 'Edro'],
+  ['vartels', 'Vartels', 'Tintim'],
+  ['joao_dias', 'João Dias', 'Rocha Mole'],
+  ['gabriel', 'Gabriel', 'Picha'],
+  ['moguels', 'Moguels', 'Vaquinha'],
+  ['caco', 'Caço', 'Setaque'],
+  ['carmo', 'Carmo', 'Ca...Clara'],
+  ['vaz', 'Vaz', 'Sou-Bi-Ónico'],
+  ['maria_castro', 'Maria Castro', ''],
+  ['matilde_neves', 'Matilde Neves', 'Apóstolo 12 e Meio'],
+  ['ines_costa', 'Inês Costa', 'Fábio Coentrão'],
+  ['sofia_pascoa', 'Sofia Páscoa', ''],
+  ['migueleo', 'Migueleo', 'Miguélio 50 Pontos'],
+  ['tildes', 'Matilde', 'Inspetora Mini'],
+  ['bia_l', 'Bia Landeiro', ''],
+  ['marta', 'Marta', ''],
+  ['pippo', 'Pippo', 'Triângulo Otis'],
+  ['leti', 'Letícia', 'Lanches'],
+  ['matilde_alves', 'Matilde', 'A Falhada'],
+  ['kika_rocha', 'Kika Rocha', ''],
+  ['mini_rita', 'Mini Rita', 'Kréu'],
+  ['rui_jorge', 'Rui Jorge', 'Dora'],
+  ['vasco', 'Vasco', 'Isqueiro'],
+  ['rodolfo', 'Rodolfo', 'Comilão'],
+  ['cesar', 'César', 'Inem'],
+  ['maria_p', 'Maria P.', 'Delay'],
+  ['tommy', 'Tommy', 'Eminem da Praxe'],
+  ['mike', 'Mike', 'GPS'],
+  ['sassa', 'Sassa', 'MC Completo'],
+  ['mota', 'Mota', 'Angélico'],
+  ['munha', 'Munhá', 'Varão'],
+  ['ximenes', 'Ximenes', 'Palma Bigots X-Men Calvo'],
+  ['henrique', 'Henrique', 'Phenrique'],
+  ['maria_costa', 'Maria Costa', ''],
+  ['andreia', 'Andreia', 'Kréu'],
+  ['tomas_h', 'Tomás H.', 'Grito'],
+  ['maravilha', 'Maravilha', 'Pirata Rabolho'],
+  ['sissi', 'Sissi', ''],
+  ['gabi', 'Gabi', 'Camões'],
+  ['carol', 'Carol', 'Letxícia'],
+  ['dinis', 'Dinis', 'Charlotte'],
+  ['joana', 'Joana', 'Bombas'],
+  ['susi', 'Susi', "Fiambre d'Atum"],
+  ['tomas_m', 'Tomás M.', 'Caloirinho D.T.T.'],
+  ['nanda', 'Nanda', 'A Careca dum Calvo que Parece o Rabo dum Macaco'],
+  ['raul', 'Raul', 'Maré'],
+  ['rita_pais', 'Rita Pais', 'Padeira de Campolide de Gelatina Quedas Torera'],
+  ['eva', 'Eva', 'Eva Gina Flor'],
+  ['sara', 'Sara', 'Ladrona Ultras Autotuna'],
+  ['sofia_l', 'Sofia', 'Sofia Solista'],
+  ['tita', 'Tita', ''],
+  ['morgana', 'Morgana', 'Unísono'],
+  ['ana', 'Ana', ''],
+  ['luisa', 'Luísa', 'Monstrinho do Álcool'],
+  ['neves', 'Neves', 'Caloiro 123'],
+  ['barriga', 'Barriga', "Belly's"],
+  ['joaozinho', 'Joãozinho', 'Joãozinho Joãozinho Joãozinho'],
+  ['rui_g', 'Rui Guedes', 'Machupão Alfa'],
+  ['catarina', 'Catarina', 'Kirk Kat'],
+  ['estrela', 'Estrela', 'O Máiore'],
+  ['porto', 'Porto', 'Sou um Piço'],
+  ['tiago_soares', 'Tiago Soares', ''],
+  ['maquina', 'Máquina', 'Máquina do Álcool'],
+  ['matilde_roque', 'Matilde Roque', ''],
+  ['timi', 'Timi', 'Perna de Pau Médio Mal Passado'],
+  ['matilde_conde', 'Matilde Conde', 'Macaquinha das Badtrips'],
+  ['martina', 'Martina', 'Martini'],
+  ['kika_moreira', 'Kika Moreira', ''],
+  ['guilherme', 'Gui Gomes', 'Caloiro do Coito'],
+  ['laura', 'Laura', 'Petite Girly Pop'],
+  ['leonor_mendes', 'Leonor Mendes', 'Caloirra Frrancesa'],
+  ['rita_c', 'Rita Correia', 'Frigorífico'],
+  ['gui_s', 'Gui Santos', 'Guilidades o Caloiro Amor da Minha Vida'],
+  ['binga', 'Binga', 'Chambingo'],
+  ['ines_a', 'Inês Alvelos', 'Jonick'],
+  ['raquel', 'Raquel', 'Minar-te-ei'],
+  ['ines_barbeiro', 'Inês Barbeiro', ''],
+  ['leonor_catarino', 'Leonor Catarino', 'Octavia'],
 ]
 
-export const members = M.map(([id, name, nickname, generation]) => ({
+// afilhado → [padrinhos/madrinhas]  (o 1.º é o primário)
+const PADRINHOS = [
+  ['carvalheira', ['ping']],
+  ['gomes', ['ping', 'jajonhe']],
+  ['piri', ['jajonhe']],
+  ['bras', ['jajonhe']],
+  ['clara', ['jajonhe']],
+  ['ze_cordeiro', ['jajonhe']],
+  ['pedro', ['jajonhe']],
+  ['vartels', ['gomes']],
+  ['joao_dias', ['gomes']],
+  ['gabriel', ['gomes']],
+  ['moguels', ['piri', 'bras']],
+  ['caco', ['bras']],
+  ['carmo', ['vartels', 'maria_costa']],
+  ['vaz', ['joao_dias']],
+  ['maria_castro', ['joao_dias']],
+  ['matilde_neves', ['joao_dias']],
+  ['ines_costa', ['moguels']],
+  ['sofia_pascoa', ['caco']],
+  ['migueleo', ['clara']],
+  ['tildes', ['clara']],
+  ['bia_l', ['clara']],
+  ['marta', ['clara']],
+  ['pippo', ['clara']],
+  ['ana', ['clara']],
+  ['luisa', ['clara']],
+  ['laura', ['clara']],
+  ['nanda', ['clara', 'leti']],
+  ['leti', ['tildes']],
+  ['matilde_alves', ['marta']],
+  ['kika_rocha', ['marta']],
+  ['mini_rita', ['pippo', 'tommy']],
+  ['rui_jorge', ['grizo']],
+  ['vasco', ['grizo']],
+  ['rodolfo', ['grizo']],
+  ['cesar', ['grizo']],
+  ['leonor_mendes', ['grizo']],
+  ['maria_p', ['grizo', 'henrique']],
+  ['tommy', ['vasco']],
+  ['mike', ['rodolfo']],
+  ['sassa', ['mike']],
+  ['mota', ['mike', 'maravilha']],
+  ['carol', ['cesar']],
+  ['dinis', ['cesar']],
+  ['joana', ['cesar']],
+  ['guilherme', ['cesar']],
+  ['munha', ['hugo']],
+  ['ximenes', ['hugo']],
+  ['henrique', ['hugo']],
+  ['maria_costa', ['hugo']],
+  ['andreia', ['hugo']],
+  ['tomas_h', ['henrique']],
+  ['maravilha', ['henrique']],
+  ['sissi', ['maria_costa']],
+  ['gabi', ['andreia']],
+  ['susi', ['maravilha']],
+  ['tomas_m', ['maravilha']],
+  ['sara', ['maravilha']],
+  ['raul', ['vaz']],
+  ['joaozinho', ['vaz']],
+  ['rita_pais', ['ines_a', 'leonor_mendes']],
+  ['barriga', ['rui_jorge', 'ines_a']],
+  ['rui_g', ['rui_jorge']],
+  ['eva', ['migueleo']],
+  ['sofia_l', ['rita_c']],
+  ['tita', ['rita_c']],
+  ['morgana', ['gabi']],
+  ['neves', ['sassa']],
+  ['catarina', ['matilde_neves']],
+  ['estrela', ['matilde_neves']],
+  ['porto', ['joao_dias', 'maria_castro']],
+  ['tiago_soares', ['sofia_pascoa']],
+  ['matilde_conde', ['sofia_pascoa']],
+  ['maquina', ['mota']],
+  ['matilde_roque', ['susi', 'piri']],
+  ['timi', ['carmo']],
+  ['martina', ['leti']],
+  ['kika_moreira', ['laura']],
+  ['rita_c', ['leonor_mendes']],
+  ['gui_s', ['leonor_mendes']],
+  ['binga', ['leonor_mendes']],
+  ['ines_a', ['leonor_mendes']],
+  ['raquel', ['binga']],
+  ['ines_barbeiro', ['caco']],
+  ['leonor_catarino', ['joana']],
+]
+
+// Membros femininos (melhor estimativa) — define madrinha vs padrinho.
+const FEMALE = new Set([
+  'piri', 'clara', 'maria_castro', 'maria_costa', 'matilde_neves', 'ines_costa',
+  'sofia_pascoa', 'tildes', 'bia_l', 'marta', 'leti', 'matilde_alves', 'kika_rocha',
+  'mini_rita', 'maria_p', 'sissi', 'gabi', 'carol', 'joana', 'susi', 'nanda',
+  'rita_pais', 'eva', 'sara', 'sofia_l', 'tita', 'morgana', 'ana', 'luisa',
+  'catarina', 'estrela', 'matilde_roque', 'matilde_conde', 'martina', 'kika_moreira',
+  'laura', 'leonor_mendes', 'rita_c', 'binga', 'ines_a', 'raquel', 'ines_barbeiro',
+  'leonor_catarino', 'andreia', 'carmo',
+])
+
+// Geração calculada a partir do padrinho PRIMÁRIO (fundadores = geração 1).
+const primaryParent = new Map(PADRINHOS.map(([child, parents]) => [child, parents[0]]))
+function generationOf(id) {
+  let gen = 1
+  let cur = id
+  const guard = new Set()
+  while (!FOUNDERS.includes(cur) && primaryParent.has(cur) && !guard.has(cur)) {
+    guard.add(cur)
+    cur = primaryParent.get(cur)
+    gen += 1
+  }
+  return gen
+}
+
+export const members = NAMES.map(([id, name, nickname]) => ({
   id,
   name,
   nickname,
-  generation,
+  generation: generationOf(id),
   photo_url: '',
   course: '',
   faculty: '',
@@ -135,74 +235,13 @@ export const members = M.map(([id, name, nickname, generation]) => ({
   quote: '',
 }))
 
-// Membros femininos (melhor estimativa pelos nomes) — define madrinha vs padrinho.
-const FEMALE = new Set([
-  'leonor_mendes', 'matilde_neves', 'maria_castro', 'catarina', 'estrela', 'clara',
-  'ines_costa', 'sofia_pascoa', 'ines_barbeiro', 'matilde_conde', 'laura', 'tildes',
-  'bia_l', 'marta', 'eva', 'matilde_roque', 'ana', 'kika_moreira', 'martina', 'leti',
-  'nanda', 'matilde_alves', 'kika_rocha', 'luisa', 'mini_rita', 'rita_c', 'ines_a',
-  'raquel', 'tita', 'sofia_l', 'rita_pais', 'carol', 'joana', 'leonor_catarino',
-  'maria_p', 'susi', 'gabi', 'sara', 'morgana', 'andreia', 'maria', 'sissi', 'carmo',
-])
-
-// Linhagens: padrinho/madrinha → afilhados. Editar aqui para corrigir a árvore.
-const PARENT_CHILDREN = [
-  // PING
-  ['ping', ['carvalheira', 'gomes', 'ze_cordeiro']],
-  ['gomes', ['gabriel', 'joao_dias']],
-  ['ze_cordeiro', ['vartels']],
-  ['joao_dias', ['vaz', 'matilde_neves', 'maria_castro']],
-  ['vaz', ['raul', 'joaozinho']],
-  ['matilde_neves', ['porto']],
-  ['porto', ['catarina', 'estrela']],
-  // JAJONHE
-  ['jajonhe', ['piri', 'bras', 'pedro', 'clara']],
-  ['piri', ['moguels', 'caco']],
-  ['moguels', ['ines_costa']],
-  ['caco', ['sofia_pascoa', 'ines_barbeiro']],
-  ['ines_costa', ['matilde_conde', 'tiago_soares']],
-  ['matilde_conde', ['migueleo', 'laura', 'tildes']],
-  ['tiago_soares', ['bia_l', 'marta', 'pippo']],
-  ['migueleo', ['eva', 'matilde_roque', 'ana']],
-  ['laura', ['kika_moreira', 'martina']],
-  ['tildes', ['leti']],
-  ['leti', ['nanda']],
-  ['bia_l', ['matilde_alves']],
-  ['marta', ['kika_rocha', 'luisa']],
-  ['pippo', ['mini_rita']],
-  // VASCO
-  ['vasco', ['tommy', 'gui_s']],
-  // LEONOR MENDES
-  ['leonor_mendes', ['binga', 'rita_c', 'ines_a']],
-  ['binga', ['raquel']],
-  ['rita_c', ['tita', 'sofia_l']],
-  ['ines_a', ['rita_pais', 'barriga']],
-  ['barriga', ['rui_g']],
-  ['rui_g', ['carol', 'joana', 'dinis']],
-  ['dinis', ['guilherme', 'leonor_catarino']],
-  // RODOLFO
-  ['rodolfo', ['mike', 'sassa', 'mota']],
-  ['sassa', ['neves']],
-  ['mota', ['maquina']],
-  // GRIZO
-  ['grizo', ['munha', 'henrique']],
-  ['munha', ['maria_p']],
-  ['henrique', ['maravilha', 'tomas_h', 'susi', 'tomas_m']],
-  ['tomas_h', ['gabi']],
-  ['tomas_m', ['sara', 'morgana']],
-  // HUGO
-  ['hugo', ['andreia', 'maria', 'ximenes']],
-  ['maria', ['sissi']],
-  ['ximenes', ['carmo']],
-  ['carmo', ['timi']],
-]
-
-export const relationships = PARENT_CHILDREN.flatMap(([parent, children]) =>
-  children.map((child, i) => ({
+export const relationships = PADRINHOS.flatMap(([child, parents]) =>
+  parents.map((parent, i) => ({
     id: `r-${parent}-${child}`,
     parent_id: parent,
     child_id: child,
     type: FEMALE.has(parent) ? 'madrinha' : 'padrinho',
+    is_primary: i === 0,
   }))
 )
 

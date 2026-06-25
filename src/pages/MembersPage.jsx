@@ -35,11 +35,11 @@ export default function MembersPage() {
           <article key={m.id} className="card p-4 transition hover:border-champi-gold/50">
             <div className="flex items-center gap-3">
               <div className="grid h-12 w-12 place-items-center rounded-full border-2 border-champi-gold/70 bg-champi-ink text-lg font-bold text-champi-gold">
-                {(m.nickname || m.name).charAt(0)}
+                {(m.name || m.nickname).charAt(0)}
               </div>
               <div className="min-w-0">
-                <p className="font-display text-lg font-semibold text-champi-gold">{m.nickname}</p>
-                <p className="truncate text-sm text-champi-text-dim">{m.name}</p>
+                <p className="font-display text-lg font-semibold text-champi-gold">{m.name}</p>
+                {m.nickname && <p className="truncate text-sm text-champi-text-dim">“{m.nickname}”</p>}
               </div>
             </div>
             <div className="mt-3 space-y-1 text-sm text-champi-text">
