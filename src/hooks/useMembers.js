@@ -1,25 +1,57 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   members as mockMembers,
   relationships as mockRelationships,
 } from '../data/mockData'
+import {
+  isSupabaseConfigured,
+  fetchMembers,
+  fetchRelationships,
+} from '../lib/supabase'
 
 /**
- * Fonte de dados da família. Por agora devolve os dados mock.
- * Quando o Supabase estiver ligado, esta é a ÚNICA peça a mudar:
- * trocar o estado inicial por um fetch a `lib/supabase.js`.
+ * Fonte de dados da família.
+ *  - Se o Supabase estiver configurado (.env.local) → vai buscar os dados reais.
+ *  - Caso contrário → corre em modo demo com os dados mock.
  *
- * Mantém a mesma forma { members, relationships, loading, error }
- * para que as páginas não precisem de saber a origem.
+ * Forma estável: { members, relationships, loading, error, source }.
  */
 export function useMembers() {
-  const [members] = useState(mockMembers)
-  const [relationships] = useState(mockRelationships)
+  const useRemote = isSupabaseConfigured()
+  const [members, setMembers] = useState(useRemote ? [] : mockMembers)
+  const [relationships, setRelationships] = useState(useRemote ? [] : mockRelationships)
+  const [loading, setLoading] = useState(useRemote)
+  const [error, setError] = useState(null)
+
+  useEffect(() => {
+    if (!useRemote) return
+    let alive = true
+    ;(async () => {
+      try {
+        const [m, r] = await Promise.all([fetchMembers(), fetchRelationships()])
+        if (!alive) return
+        setMembers(m)
+        setRelationships(r)
+      } catch (err) {
+        if (!alive) return
+        // Falhou o remoto → cai para os dados mock para a app não ficar vazia.
+        setError(err)
+        setMembers(mockMembers)
+        setRelationships(mockRelationships)
+      } finally {
+        if (alive) setLoading(false)
+      }
+    })()
+    return () => {
+      alive = false
+    }
+  }, [useRemote])
 
   return {
     members,
     relationships,
-    loading: false,
-    error: null,
+    loading,
+    error,
+    source: useRemote ? 'supabase' : 'mock',
   }
 }

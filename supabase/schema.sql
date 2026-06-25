@@ -3,12 +3,14 @@
 -- ╚══════════════════════════════════════════════════════════════╝
 -- Executar no SQL Editor do dashboard do Supabase.
 
--- Extensão para UUIDs
+-- Extensão para gen_random_uuid (usada no auth link)
 create extension if not exists "pgcrypto";
 
 -- ── members ──────────────────────────────────────────────────────
+-- `id` é um slug de texto (ex.: 'joao_dias') igual ao usado na app — assim o
+-- seed dos dados reais e o código partilham as mesmas chaves.
 create table if not exists public.members (
-  id          uuid primary key default gen_random_uuid(),
+  id          text primary key,
   name        text not null,
   nickname    text,
   photo_url   text,
@@ -26,9 +28,9 @@ create table if not exists public.members (
 -- ── relationships ────────────────────────────────────────────────
 -- type: 'padrinho' | 'madrinha' (vertical) | 'irmao' (horizontal)
 create table if not exists public.relationships (
-  id         uuid primary key default gen_random_uuid(),
-  parent_id  uuid not null references public.members(id) on delete cascade,
-  child_id   uuid not null references public.members(id) on delete cascade,
+  id         text primary key,
+  parent_id  text not null references public.members(id) on delete cascade,
+  child_id   text not null references public.members(id) on delete cascade,
   type       text not null check (type in ('padrinho', 'madrinha', 'irmao')),
   created_at timestamptz not null default now(),
   unique (parent_id, child_id, type)
@@ -37,8 +39,8 @@ create table if not exists public.relationships (
 -- ── memories ─────────────────────────────────────────────────────
 create table if not exists public.memories (
   id         uuid primary key default gen_random_uuid(),
-  member_id  uuid not null references public.members(id) on delete cascade,
-  author_id  uuid references public.members(id) on delete set null,
+  member_id  text not null references public.members(id) on delete cascade,
+  author_id  text references public.members(id) on delete set null,
   text       text not null,
   created_at timestamptz not null default now()
 );

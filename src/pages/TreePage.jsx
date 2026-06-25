@@ -6,7 +6,7 @@ import Stats from '../components/Stats'
 import { useMembers } from '../hooks/useMembers'
 
 export default function TreePage() {
-  const { members, relationships } = useMembers()
+  const { members, relationships, loading } = useMembers()
   const [selected, setSelected] = useState(null)
   const [orientation, setOrientation] = useState('vertical')
   const [searchIds, setSearchIds] = useState(null)
@@ -16,6 +16,17 @@ export default function TreePage() {
   const handleSelect = (m) => {
     setSelected(m)
     setSearchIds(null)
+  }
+
+  if (loading) {
+    return (
+      <div className="grid h-full place-items-center">
+        <div className="flex flex-col items-center gap-3 text-champi-text-dim">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-champi-line border-t-champi-gold" />
+          <p className="text-sm">A carregar a família…</p>
+        </div>
+      </div>
+    )
   }
 
   return (
