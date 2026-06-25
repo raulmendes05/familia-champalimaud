@@ -1,0 +1,65 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    @apply bg-champi-ink text-champi-text font-sans antialiased;
+    margin: 0;
+    background-image: radial-gradient(
+        circle at 20% 0%,
+        rgba(124, 77, 255, 0.12),
+        transparent 45%
+      ),
+      radial-gradient(circle at 90% 100%, rgba(212, 175, 55, 0.08), transparent 40%);
+    background-attachment: fixed;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium
+      transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-champi-purple/60;
+  }
+  .btn-gold {
+    @apply btn bg-champi-gold text-champi-ink hover:bg-champi-gold-soft;
+  }
+  .btn-ghost {
+    @apply btn border border-champi-line bg-champi-ink-3/60 text-champi-text hover:border-champi-gold/60;
+  }
+  .card {
+    @apply rounded-2xl border border-champi-line bg-champi-panel/80 backdrop-blur;
+  }
+  .chip {
+    @apply inline-flex items-center gap-1 rounded-full border border-champi-line bg-champi-ink-3/70
+      px-2.5 py-0.5 text-xs text-champi-text-dim;
+  }
+}
+
+/* Scrollbar discreta no tema escuro */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: #3a2a55;
+  border-radius: 8px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #4a2b8c;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
