@@ -66,6 +66,13 @@ create policy "members_update_own"
   using (auth_id = auth.uid())
   with check (auth_id = auth.uid());
 
+-- O ADMINISTRADOR (pelo email) pode editar qualquer membro — usado para gerir
+-- as fotos. Muda o email se o administrador for outro.
+create policy "members_admin_update"
+  on public.members for update
+  using ((auth.jwt() ->> 'email') = 'fernandobluego@gmail.com')
+  with check ((auth.jwt() ->> 'email') = 'fernandobluego@gmail.com');
+
 -- Memórias: qualquer autenticado pode escrever; só o autor pode apagar
 create policy "mem_insert_auth"
   on public.memories for insert

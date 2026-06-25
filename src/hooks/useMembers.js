@@ -47,11 +47,16 @@ export function useMembers() {
     }
   }, [useRemote])
 
+  // Atualiza um membro no estado local (após guardar no Supabase).
+  const patchMember = (id, patch) =>
+    setMembers((ms) => ms.map((m) => (m.id === id ? { ...m, ...patch } : m)))
+
   return {
     members,
     relationships,
     loading,
     error,
+    patchMember,
     source: useRemote ? 'supabase' : 'mock',
   }
 }

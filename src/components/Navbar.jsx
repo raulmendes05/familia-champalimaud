@@ -1,4 +1,6 @@
 import { NavLink } from 'react-router-dom'
+import { useAuth } from '../hooks/useAuth'
+import { signOut } from '../lib/supabase'
 
 const linkClass = ({ isActive }) =>
   `rounded-lg px-3 py-1.5 text-sm font-medium transition ${
@@ -8,15 +10,15 @@ const linkClass = ({ isActive }) =>
   }`
 
 export default function Navbar() {
+  const { email, isAdmin } = useAuth()
+
   return (
     <header className="z-30 flex items-center justify-between border-b border-champi-line/70 bg-champi-ink-2/80 px-4 py-2.5 backdrop-blur">
       <div className="flex items-center gap-2.5">
         <img src="/champi.svg" alt="" className="h-8 w-8" />
         <div className="leading-tight">
           <p className="font-display text-lg font-semibold text-champi-gold">Família Champalimaud</p>
-          <p className="text-[10px] uppercase tracking-[0.2em] text-champi-text-dim">
-            Árvore de praxe
-          </p>
+          <p className="text-[10px] uppercase tracking-[0.2em] text-champi-text-dim">Árvore de praxe</p>
         </div>
       </div>
 
@@ -30,9 +32,30 @@ export default function Navbar() {
         <NavLink to="/geracoes" className={linkClass}>
           Gerações
         </NavLink>
-        <NavLink to="/login" className={linkClass}>
-          Entrar
-        </NavLink>
+        {isAdmin ? (
+          <div className="ml-1 flex items-center gap-1.5">
+            <span className="rounded-full bg-champi-gold/15 px-2 py-1 text-xs font-medium text-champi-gold">
+              Admin
+            </span>
+            <button
+              onClick={() => signOut()}
+              className="rounded-lg px-3 py-1.5 text-sm font-medium text-champi-text-dim hover:text-champi-text"
+            >
+              Sair
+            </button>
+          </div>
+        ) : email ? (
+          <button
+            onClick={() => signOut()}
+            className="rounded-lg px-3 py-1.5 text-sm font-medium text-champi-text-dim hover:text-champi-text"
+          >
+            Sair
+          </button>
+        ) : (
+          <NavLink to="/login" className={linkClass}>
+            Entrar
+          </NavLink>
+        )}
       </nav>
     </header>
   )

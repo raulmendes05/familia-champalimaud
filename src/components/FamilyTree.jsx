@@ -4,7 +4,6 @@ import { buildHierarchy, branchOf } from '../utils/tree'
 import { POSITIONS, SCALE, NODE, LINES } from '../data/layout'
 import { FOUNDER_BADGES, isFounder } from '../data/founders'
 import { TorreGlyph } from './FounderBadge'
-import { usePhotos } from '../utils/photos'
 
 const NODE_W = NODE.W
 const NODE_H = NODE.H
@@ -36,7 +35,6 @@ export default function FamilyTree({
   lineageIds = null,
   onSelect = () => {},
 }) {
-  const photos = usePhotos()
   const svgRef = useRef(null)
   const gRef = useRef(null)
   const zoomRef = useRef(null)
@@ -147,7 +145,7 @@ export default function FamilyTree({
               const p = place(d)
               const m = d.data.member
               const { isSelected, isSearchHit, isDimmed } = nodeState(d)
-              const photo = photos[d.data.id]
+              const photo = m?.photo_url
               const founder = isFounder(d.data.id) ? FOUNDER_BADGES[d.data.id] : null
               const stroke = isSelected ? COLORS.gold : isSearchHit ? COLORS.purpleSoft : COLORS.line
               return (

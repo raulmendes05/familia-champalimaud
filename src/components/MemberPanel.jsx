@@ -2,7 +2,6 @@ import { relationsOf, founderOf } from '../utils/tree'
 import { FACULDADES, memories } from '../data/mockData'
 import { FOUNDER_BADGES } from '../data/founders'
 import FounderBadge from './FounderBadge'
-import { usePhotos } from '../utils/photos'
 
 const TYPE_LABEL = {
   padrinho: 'Padrinho',
@@ -25,7 +24,6 @@ export default function MemberPanel({
   onSelect,
   onClose,
 }) {
-  const photos = usePhotos()
   if (!member) return null
   const { padrinhos, afilhados, irmaos } = relationsOf(member.id, members, relationships)
   const memberMemories = memories.filter((mm) => mm.member_id === member.id)
@@ -33,7 +31,7 @@ export default function MemberPanel({
   const founderId = founderOf(member.id, relationships)
   const founder = FOUNDER_BADGES[founderId]
   const founderName = byId(founderId)?.name || founder?.label
-  const photo = photos[member.id]
+  const photo = member.photo_url
 
   // 2.º(s) padrinho(s) — relações verticais não-primárias deste membro
   const VERT = new Set(['padrinho', 'madrinha'])
