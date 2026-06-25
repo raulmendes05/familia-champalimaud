@@ -37,10 +37,13 @@ export default function FamilyTree({
   const [size, setSize] = useState({ width: 800, height: 600 })
   const containerRef = useRef(null)
 
+  // single = mostrar só o padrinho PRINCIPAL (árvore limpa, sem cruzamentos)
+  const [single, setSingle] = useState(false)
+
   const layout = useMemo(() => {
-    const usingFixed = members.length > 0 && members.every((m) => POSITIONS[m.id])
+    const usingFixed = !single && members.length > 0 && members.every((m) => POSITIONS[m.id])
     return usingFixed ? fixedLayout(members) : autoLayout(members, relationships, orientation)
-  }, [members, relationships, orientation])
+  }, [members, relationships, orientation, single])
 
   const branch = useMemo(
     () => (selectedId ? branchOf(selectedId, relationships) : null),
@@ -102,7 +105,7 @@ export default function FamilyTree({
                   />
                 ))
               : links.map((l, i) => (
-                  <path key={i} d={l.d} stroke={COLORS.line} strokeWidth={1.6} strokeOpacity={0.9} />
+                  <path key={i} d={l.d} stroke={COLORS.purple} strokeWidth={1.7} strokeOpacity={branch ? 0.28 : 0.6} />
                 ))}
           </g>
 
@@ -158,6 +161,21 @@ export default function FamilyTree({
           </g>
         </g>
       </svg>
+
+      {/* Alternar: réplica do PDF (todos os padrinhos) ↔ só padrinho principal */}
+      <button
+        onClick={() => setSingle((s) => !s)}
+        title={single ? 'A mostrar só o padrinho principal de cada pessoa' : 'A mostrar todos os padrinhos (réplica do PDF)'}
+        className={`absolute left-4 top-4 flex items-center gap-2 rounded-full border px-3.5 py-2 text-sm font-medium
+          backdrop-blur transition ${
+            single
+              ? 'border-champi-gold/60 bg-champi-gold/15 text-champi-gold'
+              : 'border-champi-line bg-champi-ink-3/80 text-champi-text hover:border-champi-gold/50'
+          }`}
+      >
+        <span className={`h-2.5 w-2.5 rounded-full ${single ? 'bg-champi-gold' : 'bg-champi-purple'}`} />
+        {single ? 'Só padrinho principal' : 'Todos os padrinhos'}
+      </button>
 
       <div className="absolute bottom-4 right-4 flex flex-col gap-1.5">
         <ZoomBtn label="+" onClick={() => zoomBy(svgRef, zoomRef, 1.3)} />
