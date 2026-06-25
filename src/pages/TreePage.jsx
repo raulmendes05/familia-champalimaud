@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import FamilyTree from '../components/FamilyTree'
 import MemberPanel from '../components/MemberPanel'
 import SearchBar from '../components/SearchBar'
@@ -24,6 +24,27 @@ export default function TreePage() {
       const next = new Set(prev)
       next.has(id) ? next.delete(id) : next.add(id)
       return next
+    })
+
+  // Todos os afilhados com 2.º padrinho (para o botão "mostrar todas")
+  const secondaryChildIds = useMemo(() => {
+    const VERT = new Set(['padrinho', 'madrinha'])
+    const ids = new Set()
+    for (const r of relationships) if (VERT.has(r.type) && !r.is_primary) ids.add(r.child_id)
+    return [...ids]
+  }, [relationships])
+
+  const allSecondaryOn =
+    secondaryChildIds.length > 0 && secondaryChildIds.every((id) => secondaryShown.has(id))
+
+  const toggleAllSecondary = () =>
+    setSecondaryShown((prev) => {
+      if (allSecondaryOn) {
+        const next = new Set(prev)
+        for (const id of secondaryChildIds) next.delete(id)
+        return next
+      }
+      return new Set([...prev, ...secondaryChildIds])
     })
 
   if (loading) {
@@ -59,7 +80,13 @@ export default function TreePage() {
             onPickGeneration={setDimGenerations}
             onSelect={handleSelect}
           />
-          <Stats members={members} relationships={relationships} onSelect={handleSelect} />
+          <Stats
+            members={members}
+            relationships={relationships}
+            onSelect={handleSelect}
+            allSecondaryOn={allSecondaryOn}
+            onToggleAllSecondary={toggleAllSecondary}
+          />
         </div>
       )}
 

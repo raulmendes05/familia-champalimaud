@@ -5,7 +5,7 @@ import { computeStats, buildAdjacency, degreesOfSeparation } from '../utils/tree
  * Painel de estatísticas + calculadora de grau de separação.
  * Props: members, relationships, onSelect(member)
  */
-export default function Stats({ members, relationships, onSelect }) {
+export default function Stats({ members, relationships, onSelect, allSecondaryOn = false, onToggleAllSecondary }) {
   const stats = useMemo(() => computeStats(members, relationships), [members, relationships])
   const adj = useMemo(() => buildAdjacency(members, relationships), [members, relationships])
 
@@ -65,6 +65,23 @@ export default function Stats({ members, relationships, onSelect }) {
           <p className="mt-2 text-sm text-champi-text-dim">Sem ligação conhecida entre os dois.</p>
         )}
       </div>
+
+      {/* Mostrar/esconder TODAS as linhas de 2.º padrinho de uma vez */}
+      {onToggleAllSecondary && (
+        <div className="mt-4 border-t border-champi-line pt-3">
+          <button
+            onClick={onToggleAllSecondary}
+            className={`flex w-full items-center justify-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition ${
+              allSecondaryOn
+                ? 'border-champi-gold bg-champi-gold/15 text-champi-gold'
+                : 'border-champi-gold/50 text-champi-gold hover:bg-champi-gold/10'
+            }`}
+          >
+            <span className="text-base leading-none">{allSecondaryOn ? '✓' : '＋'}</span>
+            {allSecondaryOn ? 'Esconder todos os 2.os padrinhos' : 'Mostrar todos os 2.os padrinhos'}
+          </button>
+        </div>
+      )}
     </div>
   )
 }
