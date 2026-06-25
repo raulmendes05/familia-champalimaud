@@ -14,8 +14,6 @@ export const FACULDADES = {
   FM: 'Faculdade de Medicina',
 }
 
-const FOUNDERS = ['ping', 'jajonhe', 'grizo', 'hugo']
-
 // [id, nome, alcunha]
 const NAMES = [
   ['ping', 'Ping', 'T-Rex Gregossauro'],
@@ -207,25 +205,36 @@ const FEMALE = new Set([
   'leonor_catarino', 'andreia', 'carmo',
 ])
 
-// Geração calculada a partir do padrinho PRIMÁRIO (fundadores = geração 1).
-const primaryParent = new Map(PADRINHOS.map(([child, parents]) => [child, parents[0]]))
-function generationOf(id) {
-  let gen = 1
-  let cur = id
-  const guard = new Set()
-  while (!FOUNDERS.includes(cur) && primaryParent.has(cur) && !guard.has(cur)) {
-    guard.add(cur)
-    cur = primaryParent.get(cur)
-    gen += 1
-  }
-  return gen
+// Geração de praxe — valor EXPLÍCITO (indicado pelo Raul). Não segue a
+// profundidade dos padrinhos: é o ano/geração real a que cada membro pertence.
+const GENERATION = {
+  // Geração 1 — fundadores
+  ping: 1, jajonhe: 1, grizo: 1, hugo: 1,
+  // Geração 2
+  carvalheira: 2, gomes: 2, piri: 2, bras: 2, clara: 2, pedro: 2, vasco: 2,
+  rodolfo: 2, cesar: 2, maria_p: 2, henrique: 2, maria_costa: 2, andreia: 2,
+  leonor_mendes: 2,
+  // Geração 3
+  vartels: 3, joao_dias: 3, moguels: 3, caco: 3, tildes: 3, marta: 3, pippo: 3,
+  tommy: 3, mike: 3, tomas_h: 3, maravilha: 3, sissi: 3, binga: 3, ze_cordeiro: 3,
+  // Geração 4
+  munha: 4, ximenes: 4, rui_jorge: 4, gabriel: 4, migueleo: 4, bia_l: 4, gabi: 4,
+  carol: 4, dinis: 4, joana: 4, laura: 4, rita_c: 4, gui_s: 4, ines_a: 4, carmo: 4,
+  vaz: 4, maria_castro: 4, matilde_neves: 4, ines_costa: 4, sofia_pascoa: 4, leti: 4,
+  matilde_alves: 4, kika_rocha: 4, mini_rita: 4, sassa: 4, mota: 4, susi: 4,
+  tomas_m: 4, raquel: 4, ines_barbeiro: 4,
+  // Geração 5
+  raul: 5, neves: 5, joaozinho: 5, catarina: 5, estrela: 5, tiago_soares: 5,
+  maquina: 5, matilde_roque: 5, timi: 5, matilde_conde: 5, martina: 5, rita_pais: 5,
+  eva: 5, sara: 5, sofia_l: 5, tita: 5, morgana: 5, porto: 5, kika_moreira: 5,
+  leonor_catarino: 5, nanda: 5, ana: 5, luisa: 5, barriga: 5, rui_g: 5, guilherme: 5,
 }
 
 export const members = NAMES.map(([id, name, nickname]) => ({
   id,
   name,
   nickname,
-  generation: generationOf(id),
+  generation: GENERATION[id] ?? 0,
   photo_url: '',
   course: '',
   faculty: '',
