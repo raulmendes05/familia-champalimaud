@@ -27,3 +27,5 @@ yarn-error.log*
 *.pdf
 scratch_*.json
 *_err.txt
+.vercel
+.env*

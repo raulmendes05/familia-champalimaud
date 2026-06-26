@@ -115,7 +115,7 @@ function PhotoCard({ member, founderId, isAdmin, onSaved }) {
         title={isAdmin ? 'Adicionar / mudar foto' : member.name}
       >
         {photo ? (
-          <img src={photo} alt={member.name} className="h-full w-full object-cover" />
+          <img src={photo} alt={member.name} className="cartoon h-full w-full object-cover" />
         ) : (
           <div className="grid h-full w-full place-items-center bg-champi-ink text-4xl font-bold text-champi-gold/70">
             {(member.name || member.nickname || '?').charAt(0)}

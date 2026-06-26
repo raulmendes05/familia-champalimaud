@@ -62,7 +62,7 @@ export default function MemberPanel({
               bg-champi-ink text-2xl font-bold text-champi-gold"
           >
             {photo || member.photo_url ? (
-              <img src={photo || member.photo_url} alt="" className="h-full w-full rounded-full object-cover" />
+              <img src={photo || member.photo_url} alt="" className="cartoon h-full w-full rounded-full object-cover" />
             ) : (
               (member.name || member.nickname).charAt(0)
             )}

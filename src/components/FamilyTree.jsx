@@ -177,6 +177,7 @@ export default function FamilyTree({
                       width={26}
                       height={26}
                       clipPath="url(#champi-avatar)"
+                      filter="url(#cartoon)"
                       preserveAspectRatio="xMidYMid slice"
                     />
                   ) : (
