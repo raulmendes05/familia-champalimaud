@@ -64,7 +64,17 @@ def read_image(path):
 
 CASCADE = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 
-def crop_face(img, size=256):
+def cartoonize(img):
+    """Efeito ilustração: suaviza preservando contornos, satura e posteriza."""
+    sm = cv2.bilateralFilter(img, 9, 90, 90)
+    hsv = cv2.cvtColor(sm, cv2.COLOR_BGR2HSV).astype(np.float32)
+    hsv[..., 1] = np.clip(hsv[..., 1] * 1.4, 0, 255)
+    sat = cv2.cvtColor(hsv.astype(np.uint8), cv2.COLOR_HSV2BGR)
+    levels = np.array([0, 69, 135, 199, 255], dtype=np.uint8)
+    idx = np.clip((sat.astype(np.int32) * 5) // 256, 0, 4)
+    return levels[idx]
+
+def crop_face(img, size=384):
     h, w = img.shape[:2]
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     faces = CASCADE.detectMultiScale(gray, scaleFactor=1.15, minNeighbors=5, minSize=(60, 60))
@@ -113,7 +123,7 @@ def main(folder):
             if img is None:
                 errors.append(f'{fn} (não consegui ler)'); continue
             crop, had_face = crop_face(img)
-            upload(mid, to_data_url(crop))
+            upload(mid, to_data_url(cartoonize(crop)))
             done += 1
             faces_found += 1 if had_face else 0
             print(f'  ✓ {by_id[mid]["name"]:22} {"(cara)" if had_face else "(centro)"}  ← {fn}')

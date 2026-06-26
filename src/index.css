@@ -4,11 +4,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Efeito "cartoon" nas fotos dos membros (filtro definido em App > CartoonDefs) */
-.cartoon {
-  filter: url(#cartoon) contrast(1.12);
-}
-
 @layer base {
   :root {
     color-scheme: dark;

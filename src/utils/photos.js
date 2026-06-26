@@ -50,8 +50,26 @@ export function usePhotos() {
   return useSyncExternalStore(subscribe, () => cache, () => cache)
 }
 
-/** Lê um ficheiro de imagem e devolve um data-URL reduzido (JPEG ~256px). */
-export function fileToScaledDataURL(file, max = 256, quality = 0.82) {
+// Posteriza (5 níveis) + satura — "cozinha" o efeito cartoon na própria imagem.
+const LEVELS = [0, 69, 135, 199, 255]
+function bakeCartoon(ctx, w, h) {
+  const img = ctx.getImageData(0, 0, w, h)
+  const a = img.data
+  for (let i = 0; i < a.length; i += 4) {
+    const r = a[i], g = a[i + 1], b = a[i + 2]
+    const gray = 0.299 * r + 0.587 * g + 0.114 * b
+    const R = Math.max(0, Math.min(255, gray + (r - gray) * 1.4))
+    const G = Math.max(0, Math.min(255, gray + (g - gray) * 1.4))
+    const B = Math.max(0, Math.min(255, gray + (b - gray) * 1.4))
+    a[i] = LEVELS[Math.min(4, (R * 5) >> 8)]
+    a[i + 1] = LEVELS[Math.min(4, (G * 5) >> 8)]
+    a[i + 2] = LEVELS[Math.min(4, (B * 5) >> 8)]
+  }
+  ctx.putImageData(img, 0, 0)
+}
+
+/** Lê uma imagem, reduz (~384px) e devolve um data-URL JÁ em estilo cartoon. */
+export function fileToScaledDataURL(file, max = 384, quality = 0.86) {
   return new Promise((resolve, reject) => {
     const url = URL.createObjectURL(file)
     const img = new Image()
@@ -62,7 +80,9 @@ export function fileToScaledDataURL(file, max = 256, quality = 0.82) {
       const canvas = document.createElement('canvas')
       canvas.width = w
       canvas.height = h
-      canvas.getContext('2d').drawImage(img, 0, 0, w, h)
+      const ctx = canvas.getContext('2d')
+      ctx.drawImage(img, 0, 0, w, h)
+      bakeCartoon(ctx, w, h)
       URL.revokeObjectURL(url)
       resolve(canvas.toDataURL('image/jpeg', quality))
     }

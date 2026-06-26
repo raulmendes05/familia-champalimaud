@@ -5,8 +5,8 @@ import { POSITIONS, SCALE, NODE, LINES } from '../data/layout'
 import { FOUNDER_BADGES, isFounder } from '../data/founders'
 import { TorreGlyph } from './FounderBadge'
 
-const NODE_W = NODE.W
-const NODE_H = NODE.H
+const NODE_W = 150
+const NODE_H = 54
 const COLORS = {
   gold: '#d4af37',
   goldSoft: '#e8c969',
@@ -115,7 +115,7 @@ export default function FamilyTree({
       <svg ref={svgRef} className="h-full w-full cursor-grab active:cursor-grabbing">
         <defs>
           <clipPath id="champi-avatar">
-            <circle cx={20} cy={NODE_H / 2} r={13} />
+            <circle cx={25} cy={NODE_H / 2} r={18} />
           </clipPath>
         </defs>
         <g ref={gRef}>
@@ -168,37 +168,36 @@ export default function FamilyTree({
                     stroke={stroke}
                     strokeWidth={isSelected ? 2.5 : 1.4}
                   />
-                  <circle cx={20} cy={NODE_H / 2} r={13} fill={COLORS.ink} />
+                  <circle cx={25} cy={NODE_H / 2} r={18} fill={COLORS.ink} />
                   {photo ? (
                     <image
                       href={photo}
                       x={7}
-                      y={NODE_H / 2 - 13}
-                      width={26}
-                      height={26}
+                      y={NODE_H / 2 - 18}
+                      width={36}
+                      height={36}
                       clipPath="url(#champi-avatar)"
-                      filter="url(#cartoon)"
                       preserveAspectRatio="xMidYMid slice"
                     />
                   ) : (
                     <text
-                      x={20}
-                      y={NODE_H / 2 + 4}
+                      x={25}
+                      y={NODE_H / 2 + 5}
                       textAnchor="middle"
-                      fontSize={12}
+                      fontSize={16}
                       fontWeight="700"
                       fill={isSelected ? COLORS.gold : COLORS.purpleSoft}
                     >
                       {(m?.name || m?.nickname || '?').charAt(0)}
                     </text>
                   )}
-                  <circle cx={20} cy={NODE_H / 2} r={13} fill="none" stroke={stroke} strokeWidth={1.3} />
-                  <text x={38} y={m?.nickname ? 20 : 27} fontSize={11.5} fontWeight="700" fill={COLORS.text}>
+                  <circle cx={25} cy={NODE_H / 2} r={18} fill="none" stroke={stroke} strokeWidth={1.4} />
+                  <text x={52} y={m?.nickname ? 23 : 31} fontSize={12.5} fontWeight="700" fill={COLORS.text}>
                     {truncate(m?.name, 13)}
                   </text>
                   {m?.nickname && (
-                    <text x={38} y={33} fontSize={8.5} fill={COLORS.textDim}>
-                      {truncate(m.nickname, 17)}
+                    <text x={52} y={38} fontSize={9} fill={COLORS.textDim}>
+                      {truncate(m.nickname, 18)}
                     </text>
                   )}
                   {founder &&
