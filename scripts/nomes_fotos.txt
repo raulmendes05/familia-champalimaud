@@ -1,0 +1,104 @@
+GUIA DE NOMES DAS FOTOS — Família Champalimaud
+
+Nomeia cada ficheiro como indicado (ou com o nome da pessoa). Ex.: ping.jpg
+Onde houver nomes repetidos, usa o ID (a 1.ª coluna) para não haver confusão.
+
+
+── Geração 1 ──
+  grizo.jpg               Grizo  («Burlão»)
+  hugo.jpg                Hugo  («Donald»)
+  jajonhe.jpg             Jajonhe  («Tropas»)
+  ping.jpg                Ping  («T-Rex Gregossauro»)
+
+── Geração 2 ──
+  andre.jpg               André
+  andreia.jpg             Andreia  («Kréu»)
+  bras.jpg                Brás  («Morcelas»)
+  carvalheira.jpg         Carvalheira  («Mãe Estou Solteiro»)
+  cesar.jpg               César  («Inem»)
+  clara.jpg               Clara  («Pardalita»)
+  gomes.jpg               Gomes  («O Incrível Hulkoiro»)
+  henrique.jpg            Henrique  («Phenrique»)
+  leonor_mendes.jpg       Leonor Mendes  («Caloirra Frrancesa»)
+  maria_costa.jpg         Maria Costa
+  pedro.jpg               Pedro  («Edro»)
+  piri.jpg                Piri
+  rodolfo.jpg             Rodolfo  («Comilão»)
+  vasco.jpg               Vasco  («Isqueiro»)
+
+── Geração 3 ──
+  binga.jpg               Binga  («Chambingo»)
+  caco.jpg                Caço  («Setaque»)
+  joao_dias.jpg           João Dias  («Rocha Mole»)
+  maravilha.jpg           Maravilha  («Pirata Rabolho»)
+  maria_p.jpg             Maria P.  («Delay»)
+  marta.jpg               Marta
+  tildes.jpg              Matilde  («Inspetora Mini»)
+  mike.jpg                Mike  («GPS»)
+  moguels.jpg             Moguels  («Vaquinha»)
+  pippo.jpg               Pippo  («Triângulo Otis»)
+  sissi.jpg               Sissi
+  tomas_h.jpg             Tomás H.  («Grito»)
+  tommy.jpg               Tommy  («Eminem da Praxe»)
+  vartels.jpg             Vartels  («Tintim»)
+  ze_cordeiro.jpg         Zé Cordeiro  («Zé Curriqueiro Follow The Leader»)
+
+── Geração 4 ──
+  bia_l.jpg               Bia Landeiro
+  carmo.jpg               Carmo  («Ca...Clara»)
+  carol.jpg               Carol  («Letxícia»)
+  dinis.jpg               Dinis  («Charlotte»)
+  gabi.jpg                Gabi  («Camões»)
+  gabriel.jpg             Gabriel  («Picha»)
+  gui_s.jpg               Gui Santos  («Guilidades o Caloiro Amor da Minha Vida»)
+  ines_a.jpg              Inês Alvelos  («Jonick»)
+  ines_barbeiro.jpg       Inês Barbeiro
+  ines_costa.jpg          Inês Costa  («Fábio Coentrão»)
+  joana.jpg               Joana  («Bombas»)
+  kika_rocha.jpg          Kika Rocha
+  laura.jpg               Laura  («Petite Girly Pop»)
+  leti.jpg                Letícia  («Lanches»)
+  maria_castro.jpg        Maria Castro
+  matilde_alves.jpg       Matilde  («A Falhada»)
+  matilde_neves.jpg       Matilde Neves  («Apóstolo 12 e Meio»)
+  migueleo.jpg            Migueleo  («Miguélio 50 Pontos»)
+  mini_rita.jpg           Mini Rita  («Kréu»)
+  mota.jpg                Mota  («Angélico»)
+  munha.jpg               Munhá  («Varão»)
+  raquel.jpg              Raquel  («Minar-te-ei»)
+  rita_c.jpg              Rita Correia  («Frigorífico»)
+  rui_jorge.jpg           Rui Jorge  («Dora»)
+  sassa.jpg               Sassa  («MC Completo»)
+  sofia_pascoa.jpg        Sofia Páscoa
+  susi.jpg                Susi  («Fiambre d'Atum»)
+  tomas_m.jpg             Tomás M.  («Caloirinho D.T.T.»)
+  vaz.jpg                 Vaz  («Sou-Bi-Ónico»)
+  ximenes.jpg             Ximenes  («Palma Bigots X-Men Calvo»)
+
+── Geração 5 ──
+  ana.jpg                 Ana
+  barriga.jpg             Barriga  («Belly's»)
+  catarina.jpg            Catarina  («Kirk Kat»)
+  estrela.jpg             Estrela  («O Máiore»)
+  eva.jpg                 Eva  («Eva Gina Flor»)
+  guilherme.jpg           Gui Gomes  («Caloiro do Coito»)
+  joaozinho.jpg           Joãozinho  («Joãozinho Joãozinho Joãozinho»)
+  kika_moreira.jpg        Kika Moreira
+  leonor_catarino.jpg     Leonor Catarino  («Octavia»)
+  luisa.jpg               Luísa  («Monstrinho do Álcool»)
+  maquina.jpg             Máquina  («Máquina do Álcool»)
+  martina.jpg             Martina  («Martini»)
+  matilde_conde.jpg       Matilde Conde  («Macaquinha das Badtrips»)
+  matilde_roque.jpg       Matilde Roque
+  morgana.jpg             Morgana  («Unísono»)
+  nanda.jpg               Nanda  («A Careca dum Calvo que Parece o Rabo dum Macaco»)
+  neves.jpg               Neves  («Caloiro 123»)
+  porto.jpg               Porto  («Sou um Piço»)
+  raul.jpg                Raul  («Maré»)
+  rita_pais.jpg           Rita Pais  («Padeira de Campolide de Gelatina Quedas Torera»)
+  rui_g.jpg               Rui Guedes  («Machupão Alfa»)
+  sara.jpg                Sara  («Ladrona Ultras Autotuna»)
+  sofia_l.jpg             Sofia  («Sofia Solista»)
+  tiago_soares.jpg        Tiago Soares
+  timi.jpg                Timi  («Perna de Pau Médio Mal Passado»)
+  tita.jpg                Tita
