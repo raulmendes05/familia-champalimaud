@@ -29,3 +29,6 @@ scratch_*.json
 *_err.txt
 .vercel
 .env*
+
+# Fotos originais (não versionar)
+fotos-champi/
