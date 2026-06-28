@@ -42,6 +42,7 @@ const NAMES = [
   ['migueleo', 'Migueleo', 'Miguélio 50 Pontos'],
   ['tildes', 'Matilde', 'Inspetora Mini'],
   ['bia_l', 'Bia Landeiro', ''],
+  ['bia_wood', 'Bia', 'Joy: from the Wood #DaMadeira'],
   ['marta', 'Marta', ''],
   ['pippo', 'Pippo', 'Triângulo Otis'],
   ['leti', 'Letícia', 'Lanches'],
@@ -131,6 +132,7 @@ const PADRINHOS = [
   ['migueleo', ['clara']],
   ['tildes', ['clara']],
   ['bia_l', ['clara']],
+  ['bia_wood', ['gabriel']],
   ['marta', ['clara']],
   ['pippo', ['clara']],
   ['ana', ['clara']],
@@ -204,7 +206,7 @@ const FEMALE = new Set([
   'rita_pais', 'eva', 'sara', 'sofia_l', 'tita', 'morgana', 'ana', 'luisa',
   'catarina', 'estrela', 'matilde_roque', 'matilde_conde', 'martina', 'kika_moreira',
   'laura', 'leonor_mendes', 'rita_c', 'binga', 'ines_a', 'raquel', 'ines_barbeiro',
-  'leonor_catarino', 'andreia', 'carmo',
+  'leonor_catarino', 'andreia', 'carmo', 'bia_wood',
 ])
 
 // Geração de praxe — valor EXPLÍCITO (indicado pelo Raul). Não segue a
@@ -227,6 +229,7 @@ const GENERATION = {
   matilde_alves: 4, kika_rocha: 4, mini_rita: 4, sassa: 4, mota: 4, susi: 4,
   tomas_m: 4, raquel: 4, ines_barbeiro: 4,
   // Geração 5
+  bia_wood: 5,
   raul: 5, neves: 5, joaozinho: 5, catarina: 5, estrela: 5, tiago_soares: 5,
   maquina: 5, matilde_roque: 5, timi: 5, matilde_conde: 5, martina: 5, rita_pais: 5,
   eva: 5, sara: 5, sofia_l: 5, tita: 5, morgana: 5, porto: 5, kika_moreira: 5,
