@@ -8,7 +8,7 @@ export const FOUNDER_BADGES = {
   ping: { label: 'T-Rex Gregossauro', emoji: '🦖', color: '#d4af37' },
   jajonhe: { label: 'Torre de Belém', emoji: '🗼', icon: 'torre', color: '#7c4dff' },
   grizo: { label: 'Burlão', emoji: '🎩', color: '#e8c969' },
-  hugo: { label: 'Donald', emoji: '🦆', color: '#5aa9e6' },
+  hugo: { label: 'Colher de Pau', emoji: '🥄', icon: 'colher', color: '#c8893f' },
 }
 
 export const isFounder = (id) => FOUNDER_ORDER.includes(id)

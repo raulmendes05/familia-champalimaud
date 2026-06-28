@@ -3,7 +3,7 @@ import * as d3 from 'd3'
 import { buildHierarchy, branchOf } from '../utils/tree'
 import { POSITIONS, SCALE, NODE, LINES } from '../data/layout'
 import { FOUNDER_BADGES, isFounder } from '../data/founders'
-import { TorreGlyph } from './FounderBadge'
+import { glyphFor } from './FounderBadge'
 
 const NODE_W = 150
 const NODE_H = 54
@@ -147,6 +147,7 @@ export default function FamilyTree({
               const { isSelected, isSearchHit, isDimmed } = nodeState(d)
               const photo = m?.photo_url
               const founder = isFounder(d.data.id) ? FOUNDER_BADGES[d.data.id] : null
+              const glyph = founder && glyphFor(founder.icon)
               const stroke = isSelected ? COLORS.gold : isSearchHit ? COLORS.purpleSoft : COLORS.line
               return (
                 <g
@@ -201,12 +202,12 @@ export default function FamilyTree({
                     </text>
                   )}
                   {founder &&
-                    (founder.icon === 'torre' ? (
-                      <g transform={`translate(${NODE_W / 2 - 11}, -28) scale(0.95)`}>
-                        <TorreGlyph color={founder.color} />
+                    (glyph ? (
+                      <g transform={`translate(${NODE_W / 2 - 11}, -30) scale(0.92)`}>
+                        <glyph.C color={founder.color} />
                       </g>
                     ) : (
-                      <text x={NODE_W / 2} y={-7} textAnchor="middle" fontSize={17}>
+                      <text x={NODE_W / 2} y={-9} textAnchor="middle" fontSize={18}>
                         {founder.emoji}
                       </text>
                     ))}
