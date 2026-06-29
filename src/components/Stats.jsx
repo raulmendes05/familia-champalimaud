@@ -27,7 +27,7 @@ export default function Stats({ members, relationships, onSelect, allSecondaryOn
         <Stat label="Membros" value={stats.total} />
         <Stat label="Gerações" value={stats.generations} />
         <Stat label="Ligações" value={stats.padrinhoLinks} sub="padrinho/madrinha" />
-        <Stat label="Mais afilhados" value={stats.topPadrinhoCount} sub={stats.topPadrinho} />
+        <Stat label="Maior Descendência" value={stats.topFounderCount} sub={stats.topFounder} />
       </div>
 
       {/* Grau de separação */}

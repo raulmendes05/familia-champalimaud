@@ -229,29 +229,31 @@ export function computeStats(members, relationships) {
 
   const padrinhoCount = relationships.filter((r) => VERTICAL_TYPES.has(r.type)).length
 
-  // Membro com mais afilhados (padrinho/madrinha de mais gente).
-  const afilhadosCount = new Map()
-  for (const r of relationships) {
-    if (!VERTICAL_TYPES.has(r.type)) continue
-    afilhadosCount.set(r.parent_id, (afilhadosCount.get(r.parent_id) || 0) + 1)
-  }
-  let topPadrinhoId = null
-  let topPadrinhoCount = 0
-  for (const [id, count] of afilhadosCount) {
-    if (count > topPadrinhoCount) {
-      topPadrinhoId = id
-      topPadrinhoCount = count
+  // Fundador com mais descendentes (sobe pela linhagem primária até ao fundador).
+  const descCount = new Map()
+  for (const m of members) {
+    const founder = founderOf(m.id, relationships)
+    if (founder && founder !== m.id) {
+      descCount.set(founder, (descCount.get(founder) || 0) + 1)
     }
   }
-  const topPadrinho = topPadrinhoId
-    ? members.find((m) => m.id === topPadrinhoId)?.name || null
+  let topFounderId = null
+  let topFounderCount = 0
+  for (const [id, count] of descCount) {
+    if (count > topFounderCount) {
+      topFounderId = id
+      topFounderCount = count
+    }
+  }
+  const topFounder = topFounderId
+    ? members.find((m) => m.id === topFounderId)?.name || null
     : null
 
   return {
     total,
     generations,
     padrinhoLinks: padrinhoCount,
-    topPadrinho,
-    topPadrinhoCount,
+    topFounder,
+    topFounderCount,
   }
 }
