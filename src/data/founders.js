@@ -6,7 +6,7 @@ export const FOUNDER_ORDER = ['ping', 'jajonhe', 'grizo', 'hugo']
 
 export const FOUNDER_BADGES = {
   ping: { label: 'T-Rex Gregossauro', emoji: '🦖', color: '#d4af37' },
-  jajonhe: { label: 'Torre de Belém', emoji: '🗼', icon: 'torre', color: '#7c4dff' },
+  jajonhe: { label: 'Torre', emoji: '🗼', icon: 'torre', color: '#7c4dff' },
   grizo: { label: 'Burlão', emoji: '🎩', color: '#e8c969' },
   hugo: { label: 'Colher de Pau', emoji: '🥄', icon: 'colher', color: '#c8893f' },
 }
