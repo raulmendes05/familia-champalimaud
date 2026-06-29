@@ -13,7 +13,7 @@ export const ROULETTE_START = null
 
 export const ELIMINATIONS = [
   'susi',          // Dia 1 — Susana
-  null,            // Dia 2 — Tio Rick (?? confirmar)
+  'henrique',      // Dia 2 — Tio Rick (= Henrique)
   'maria_castro',  // Dia 3 — Maria Castro
   'mota',          // Dia 4 — Bernardo Mota
   'porto',         // Dia 5 — Tomás Porto
@@ -47,7 +47,7 @@ export const ELIMINATIONS = [
   'luisa',         // Dia 33 — Maria Luísa
   'rita_c',        // Dia 34 — Rita Correia
   'maria_costa',   // Dia 35 — Maria Costa
-  'mini_rita',     // Dia 36 — Ritinha (?? mini_rita ou rita_pais)
+  'mini_rita',     // Dia 36 — Ritinha (= mini_rita)
   'binga',         // Dia 37 — Binga
   'carmo',         // Dia 38 — Carmo
   'maravilha',     // Dia 39 — Maravilha

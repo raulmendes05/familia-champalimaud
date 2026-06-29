@@ -227,27 +227,31 @@ export function computeStats(members, relationships) {
   const total = members.length
   const generations = new Set(members.map((m) => m.generation)).size
 
-  const courseCount = new Map()
-  for (const m of members) {
-    if (!m.course) continue // curso por preencher — não conta
-    courseCount.set(m.course, (courseCount.get(m.course) || 0) + 1)
+  const padrinhoCount = relationships.filter((r) => VERTICAL_TYPES.has(r.type)).length
+
+  // Membro com mais afilhados (padrinho/madrinha de mais gente).
+  const afilhadosCount = new Map()
+  for (const r of relationships) {
+    if (!VERTICAL_TYPES.has(r.type)) continue
+    afilhadosCount.set(r.parent_id, (afilhadosCount.get(r.parent_id) || 0) + 1)
   }
-  let topCourse = null
-  let topCount = 0
-  for (const [course, count] of courseCount) {
-    if (count > topCount) {
-      topCourse = course
-      topCount = count
+  let topPadrinhoId = null
+  let topPadrinhoCount = 0
+  for (const [id, count] of afilhadosCount) {
+    if (count > topPadrinhoCount) {
+      topPadrinhoId = id
+      topPadrinhoCount = count
     }
   }
-
-  const padrinhoCount = relationships.filter((r) => VERTICAL_TYPES.has(r.type)).length
+  const topPadrinho = topPadrinhoId
+    ? members.find((m) => m.id === topPadrinhoId)?.name || null
+    : null
 
   return {
     total,
     generations,
-    topCourse,
-    topCourseCount: topCount,
     padrinhoLinks: padrinhoCount,
+    topPadrinho,
+    topPadrinhoCount,
   }
 }

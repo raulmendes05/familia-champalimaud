@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
-"""Recorta a cara de cada foto, reduz e carrega para o Supabase (members.photo_url).
+"""Aplica o efeito cartoon a cada foto, reduz e carrega para o Supabase (members.photo_url).
 Uso: python3 scripts/upload_photos.py <pasta-com-fotos>
 
+- As fotos JÁ VÊM enquadradas/zoomadas pela pessoa. NÃO se faz deteção de cara
+  nem zoom — só se recorta para quadrado (centro) e se aplica o cartoon.
 - Os ficheiros devem ter o NOME ou o ID da pessoa (ex.: "Ping.jpg", "joao_dias.png").
 - Aceita jpg/png/webp e HEIC (iPhone, convertido com `sips`).
 - Precisa de uma política temporária no Supabase a permitir UPDATE (ver instruções).
@@ -62,8 +64,6 @@ def read_image(path):
         return img
     return cv2.imread(path)
 
-CASCADE = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
-
 def cartoonize(img):
     """Efeito ilustração: suaviza preservando contornos, satura e posteriza."""
     sm = cv2.bilateralFilter(img, 9, 90, 90)
@@ -74,24 +74,15 @@ def cartoonize(img):
     idx = np.clip((sat.astype(np.int32) * 5) // 256, 0, 4)
     return levels[idx]
 
-def crop_face(img, size=384):
+def square_crop(img, size=384):
+    """Recorta ao quadrado pelo centro (sem zoom) e reduz para `size`.
+    A foto já vem enquadrada — só se ajusta a proporção para quadrado."""
     h, w = img.shape[:2]
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    faces = CASCADE.detectMultiScale(gray, scaleFactor=1.15, minNeighbors=5, minSize=(60, 60))
-    if len(faces):
-        fx, fy, fw, fh = max(faces, key=lambda f: f[2] * f[3])
-        cx, cy = fx + fw / 2, fy + fh / 2
-        half = max(fw, fh) * 0.95  # margem à volta da cara
-        cy -= fh * 0.1            # sobe um pouco (cabelo/testa)
-    else:
-        cx, cy = w / 2, h / 2
-        half = min(w, h) / 2
-    half = min(half, w / 2, h / 2)
-    x0 = int(max(0, min(cx - half, w - 2 * half)))
-    y0 = int(max(0, min(cy - half, h - 2 * half)))
-    s = int(2 * half)
+    s = min(w, h)
+    x0 = (w - s) // 2
+    y0 = (h - s) // 2
     crop = img[y0:y0 + s, x0:x0 + s]
-    return cv2.resize(crop, (size, size), interpolation=cv2.INTER_AREA), len(faces) > 0
+    return cv2.resize(crop, (size, size), interpolation=cv2.INTER_AREA)
 
 def to_data_url(img):
     ok, buf = cv2.imencode('.jpg', img, [cv2.IMWRITE_JPEG_QUALITY, 86])
@@ -112,7 +103,7 @@ def main(folder):
              if os.path.splitext(f)[1].lower() in ('.jpg', '.jpeg', '.png', '.webp', '.heic', '.heif')]
     if not files:
         print('Sem imagens na pasta.'); return
-    done, faces_found, unmatched, errors = 0, 0, [], []
+    done, unmatched, errors = 0, [], []
     for fn in files:
         stem = os.path.splitext(fn)[0]
         mid = lookup.get(norm(stem))
@@ -122,16 +113,15 @@ def main(folder):
             img = read_image(os.path.join(folder, fn))
             if img is None:
                 errors.append(f'{fn} (não consegui ler)'); continue
-            crop, had_face = crop_face(img)
+            crop = square_crop(img)
             upload(mid, to_data_url(cartoonize(crop)))
             done += 1
-            faces_found += 1 if had_face else 0
-            print(f'  ✓ {by_id[mid]["name"]:22} {"(cara)" if had_face else "(centro)"}  ← {fn}')
+            print(f'  ✓ {by_id[mid]["name"]:22}  ← {fn}')
         except urllib.error.HTTPError as e:
             errors.append(f'{fn} → HTTP {e.code} {e.read().decode()[:120]}')
         except Exception as e:
             errors.append(f'{fn} → {e}')
-    print(f'\nCarregadas: {done}/{len(files)}  | cara detetada: {faces_found}')
+    print(f'\nCarregadas: {done}/{len(files)}')
     if unmatched:
         print('Sem correspondência (renomeia com o nome/id da pessoa):')
         for f in unmatched: print('   -', f)
