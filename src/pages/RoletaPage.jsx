@@ -24,7 +24,8 @@ export default function RoletaPage() {
         <h1 className="font-display text-3xl font-semibold text-champi-gold">🎰 Roleta Champi</h1>
         <p className="mt-1 text-sm text-champi-text-dim">
           Todos os dias alguém é “expulso” da família (tudo na brincadeira). Aqui ficam os
-          sobreviventes e a cronologia das eliminações.
+          sobreviventes e a cronologia das eliminações.{' '}
+          <span className="text-champi-text-dim/40 italic">O m0guels tem isto tudo comprado!</span>
         </p>
       </div>
 
