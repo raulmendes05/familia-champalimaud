@@ -1,4 +1,5 @@
 import { relationsOf, founderOf } from '../utils/tree'
+import { badgesFor } from '../utils/badges'
 import { FACULDADES, memories } from '../data/mockData'
 import { FOUNDER_BADGES } from '../data/founders'
 import FounderBadge from './FounderBadge'
@@ -31,6 +32,7 @@ export default function MemberPanel({
   const founderId = founderOf(member.id, relationships)
   const founder = FOUNDER_BADGES[founderId]
   const founderName = byId(founderId)?.name || founder?.label
+  const badges = badgesFor(member, members, relationships)
   const photo = member.photo_url
 
   // 2.º(s) padrinho(s) — relações verticais não-primárias deste membro
@@ -89,6 +91,31 @@ export default function MemberPanel({
           <p className="border-l-2 border-champi-gold/70 pl-3 font-display text-lg italic text-champi-text">
             “{member.quote}”
           </p>
+        )}
+
+        {badges.length > 0 && (
+          <div>
+            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-champi-text-dim">
+              Conquistas
+            </p>
+            <div className="flex flex-wrap gap-1.5">
+              {badges.map((b) => (
+                <span
+                  key={b.key}
+                  title={b.desc}
+                  className="inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-medium"
+                  style={{
+                    color: b.color,
+                    borderColor: `${b.color}66`,
+                    background: `${b.color}1a`,
+                  }}
+                >
+                  <span className="text-sm leading-none">{b.emoji}</span>
+                  {b.label}
+                </span>
+              ))}
+            </div>
+          </div>
         )}
 
         <Field label="Curso" value={member.course} />
