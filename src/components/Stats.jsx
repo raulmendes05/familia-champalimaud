@@ -11,6 +11,7 @@ export default function Stats({ members, relationships, onSelect, allSecondaryOn
 
   const [from, setFrom] = useState('')
   const [to, setTo] = useState('')
+  const [showFounders, setShowFounders] = useState(false)
 
   const result = useMemo(() => {
     if (!from || !to) return null
@@ -27,8 +28,43 @@ export default function Stats({ members, relationships, onSelect, allSecondaryOn
         <Stat label="Membros" value={stats.total} />
         <Stat label="Gerações" value={stats.generations} />
         <Stat label="Ligações" value={stats.padrinhoLinks} sub="padrinho/madrinha" />
-        <Stat label="Maior Descendência" value={stats.topFounderCount} sub={stats.topFounder} />
+        <Stat
+          label="Maior Descendência"
+          value={stats.topFounderCount}
+          sub={stats.topFounder}
+          onClick={() => setShowFounders((v) => !v)}
+          active={showFounders}
+        />
       </div>
+
+      {/* Comparação da descendência dos fundadores */}
+      {showFounders && stats.foundersRanking.length > 0 && (
+        <div className="mt-3 rounded-lg bg-champi-ink-3/40 p-3">
+          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-champi-text-dim">
+            Descendência por fundador
+          </p>
+          <div className="flex flex-col gap-2">
+            {stats.foundersRanking.map((f) => {
+              const max = stats.foundersRanking[0].count || 1
+              const pct = Math.round((f.count / max) * 100)
+              return (
+                <button key={f.id} onClick={() => onSelect(byId(f.id))} className="group text-left">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-champi-text group-hover:text-champi-gold">{f.name}</span>
+                    <span className="font-semibold text-champi-gold-soft">{f.count}</span>
+                  </div>
+                  <div className="mt-1 h-2 overflow-hidden rounded-full bg-champi-ink">
+                    <div
+                      className="h-full rounded-full bg-champi-gold/70 transition-all"
+                      style={{ width: `${pct}%` }}
+                    />
+                  </div>
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Grau de separação */}
       <div className="mt-4 border-t border-champi-line pt-3">
@@ -86,11 +122,20 @@ export default function Stats({ members, relationships, onSelect, allSecondaryOn
   )
 }
 
-function Stat({ label, value, sub }) {
+function Stat({ label, value, sub, onClick, active }) {
+  const clickable = !!onClick
   return (
-    <div className="rounded-lg bg-champi-ink-3/50 p-2.5">
+    <div
+      onClick={onClick}
+      className={`rounded-lg bg-champi-ink-3/50 p-2.5 ${
+        clickable ? 'cursor-pointer transition hover:bg-champi-ink-3/80' : ''
+      } ${active ? 'ring-1 ring-champi-gold/60' : ''}`}
+    >
       <p className="text-2xl font-bold text-champi-text">{value}</p>
-      <p className="text-xs text-champi-text-dim">{label}</p>
+      <p className="flex items-center gap-1 text-xs text-champi-text-dim">
+        {label}
+        {clickable && <span className="text-[9px] text-champi-gold-soft">{active ? '▲' : '▼'}</span>}
+      </p>
       {sub && <p className="truncate text-[10px] text-champi-gold-soft">{sub}</p>}
     </div>
   )

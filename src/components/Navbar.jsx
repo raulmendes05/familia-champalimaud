@@ -18,7 +18,7 @@ export default function Navbar() {
         <img src="/champi.svg" alt="" className="h-8 w-8" />
         <div className="leading-tight">
           <p className="font-display text-lg font-semibold text-champi-gold">Família Champalimaud</p>
-          <p className="text-[10px] uppercase tracking-[0.2em] text-champi-text-dim">Árvore de praxe</p>
+          <p className="text-[10px] uppercase tracking-[0.2em] text-champi-text-dim">Árvore Champi</p>
         </div>
       </div>
 
