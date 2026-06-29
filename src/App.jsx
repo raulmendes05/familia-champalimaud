@@ -5,6 +5,7 @@ import MembersPage from './pages/MembersPage'
 import GenerationsPage from './pages/GenerationsPage'
 import RoletaPage from './pages/RoletaPage'
 import CompatibilidadePage from './pages/CompatibilidadePage'
+import QuizPage from './pages/QuizPage'
 import LoginPage from './pages/LoginPage'
 
 export default function App() {
@@ -18,6 +19,7 @@ export default function App() {
           <Route path="/geracoes" element={<GenerationsPage />} />
           <Route path="/roleta" element={<RoletaPage />} />
           <Route path="/match" element={<CompatibilidadePage />} />
+          <Route path="/quiz" element={<QuizPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
