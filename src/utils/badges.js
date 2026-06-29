@@ -5,6 +5,15 @@ import { isFounder } from '../data/founders'
 
 const VERT = new Set(['padrinho', 'madrinha'])
 
+// Badge por geração (nomenclatura de praxe). Gen 2 fica de fora de propósito:
+// tem veteranos e doutores misturados.
+const GEN_BADGE = {
+  1: { key: 'veterano', emoji: '🎖️', label: 'Veterano', desc: 'Geração 1 — a mais antiga.', color: '#a98bff' },
+  3: { key: 'doutor', emoji: '🎓', label: 'Doutor', desc: 'Geração 3.', color: '#a98bff' },
+  4: { key: 'pastrano', emoji: '📚', label: 'Pastrano', desc: 'Geração 4.', color: '#e8c969' },
+  5: { key: 'caloiro', emoji: '🐣', label: 'Caloiro', desc: 'Geração 5 — a mais nova.', color: '#e8c969' },
+}
+
 function childrenMap(relationships) {
   const m = new Map()
   for (const r of relationships) {
@@ -40,7 +49,6 @@ export function badgesFor(member, members, relationships) {
   const childrenOf = childrenMap(relationships)
   const elimMap = eliminationMap()
   const excluded = new Set(ROULETTE_EXCLUDED)
-  const maxGen = members.reduce((mx, m) => Math.max(mx, m.generation || 0), 0)
 
   // afilhados diretos + se é madrinha (para Patriarca/Matriarca)
   const direct = childrenOf.get(member.id) || []
@@ -106,27 +114,10 @@ export function badgesFor(member, members, relationships) {
     }
   }
 
-  // 🎖️ Veterano — geração 2 (logo a seguir aos fundadores)
-  if (member.generation === 2) {
-    out.push({
-      key: 'veterano',
-      emoji: '🎖️',
-      label: 'Veterano',
-      desc: 'Da geração mais antiga depois dos fundadores.',
-      color: '#a98bff',
-    })
-  }
-
-  // 🐣 Caloiro — geração mais recente
-  if (maxGen > 0 && member.generation === maxGen) {
-    out.push({
-      key: 'caloiro',
-      emoji: '🐣',
-      label: 'Caloiro',
-      desc: 'Da geração mais nova da árvore.',
-      color: '#e8c969',
-    })
-  }
+  // Badge por geração (nomenclatura de praxe).
+  // Gen 2 fica de fora: tem veteranos e doutores misturados.
+  const gen = GEN_BADGE[member.generation]
+  if (gen) out.push(gen)
 
   // 👯 Afilhado de dois — co-padrinhos
   if (godparents >= 2) {
