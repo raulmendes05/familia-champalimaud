@@ -27,6 +27,31 @@ export default function RoletaPage() {
   const [lineageId, setLineageId] = useState(null)
   const [secondaryShown, setSecondaryShown] = useState(() => new Set())
 
+  // Ligações da árvore dos vivos: cada sobrevivente liga-se ao antepassado VIVO
+  // mais próximo na sua linhagem primária (saltando padrinhos já eliminados),
+  // para manter a mesma descendência mesmo sem o padrinho direto.
+  const treeRels = useMemo(() => {
+    const aliveSet = new Set(survivors.map((m) => m.id))
+    const out = []
+    for (const m of survivors) {
+      const lin = lineageOf(m.id, relationships) // [fundador, …, m]
+      for (let i = lin.length - 2; i >= 0; i--) {
+        if (aliveSet.has(lin[i])) {
+          out.push({
+            id: `s-${lin[i]}-${m.id}`,
+            parent_id: lin[i],
+            child_id: m.id,
+            type: 'padrinho',
+            is_primary: true,
+          })
+          break
+        }
+      }
+    }
+    return out
+    // survivors/relationships mudam a cada eliminação → recomputa
+  }, [survivors, relationships])
+
   const lineageIds = useMemo(
     () => (lineageId ? new Set(lineageOf(lineageId, relationships)) : null),
     [lineageId, relationships]
@@ -125,7 +150,7 @@ export default function RoletaPage() {
           {survivors.length > 0 ? (
             <FamilyTree
               members={survivors}
-              relationships={relationships}
+              relationships={treeRels}
               selectedId={selected?.id || null}
               secondaryShown={secondaryShown}
               lineageIds={lineageIds}
