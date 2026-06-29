@@ -5,14 +5,28 @@ import { isFounder } from '../data/founders'
 
 const VERT = new Set(['padrinho', 'madrinha'])
 
-// Badge por geração (nomenclatura de praxe). Gen 2 fica de fora de propósito:
-// tem veteranos e doutores misturados.
-const GEN_BADGE = {
-  1: { key: 'veterano', emoji: '🎖️', label: 'Veterano', desc: 'Geração 1 — a mais antiga.', color: '#a98bff' },
-  3: { key: 'doutor', emoji: '🎓', label: 'Doutor', desc: 'Geração 3.', color: '#a98bff' },
-  4: { key: 'pastrano', emoji: '📚', label: 'Pastrano', desc: 'Geração 4.', color: '#e8c969' },
-  5: { key: 'caloiro', emoji: '🐣', label: 'Caloiro', desc: 'Geração 5 — a mais nova.', color: '#e8c969' },
+// Graus de praxe.
+const RANK_BADGE = {
+  veterano: { key: 'veterano', emoji: '🎖️', label: 'Veterano', desc: 'Grau de Veterano.', color: '#a98bff' },
+  doutor: { key: 'doutor', emoji: '🎓', label: 'Doutor', desc: 'Grau de Doutor.', color: '#a98bff' },
+  pastrano: { key: 'pastrano', emoji: '📚', label: 'Pastrano', desc: 'Grau de Pastrano.', color: '#e8c969' },
+  caloiro: { key: 'caloiro', emoji: '🐣', label: 'Caloiro', desc: 'Grau de Caloiro.', color: '#e8c969' },
 }
+
+// Regra geral: geração → grau.
+const GEN_RANK = { 1: 'veterano', 3: 'doutor', 4: 'pastrano', 5: 'caloiro' }
+
+// Gen 2 não é uniforme — grau definido por pessoa (indicado pelo Raul).
+// Quem não aparece aqui (Carvalheira, André, Pedro) não tem grau.
+const GEN2_RANK = {
+  gomes: 'doutor', vasco: 'doutor',
+  piri: 'veterano', bras: 'veterano', clara: 'veterano', rodolfo: 'veterano',
+  cesar: 'veterano', henrique: 'veterano', maria_costa: 'veterano',
+  andreia: 'veterano', leonor_mendes: 'veterano',
+}
+
+// Exceções: membros sem grau hierárquico, mesmo que a geração indicasse um.
+const NO_RANK = new Set(['sissi', 'maria_p'])
 
 function childrenMap(relationships) {
   const m = new Map()
@@ -114,10 +128,11 @@ export function badgesFor(member, members, relationships) {
     }
   }
 
-  // Badge por geração (nomenclatura de praxe).
-  // Gen 2 fica de fora: tem veteranos e doutores misturados.
-  const gen = GEN_BADGE[member.generation]
-  if (gen) out.push(gen)
+  // Grau de praxe. Gen 2 é por pessoa; algumas exceções não têm grau.
+  if (!NO_RANK.has(member.id)) {
+    const rank = member.generation === 2 ? GEN2_RANK[member.id] : GEN_RANK[member.generation]
+    if (rank && RANK_BADGE[rank]) out.push(RANK_BADGE[rank])
+  }
 
   // 👯 Afilhado de dois — co-padrinhos
   if (godparents >= 2) {
