@@ -38,7 +38,7 @@ insert into public.members (id, name, nickname, generation) values
   ('marta', 'Marta', null, 3),
   ('pippo', 'Pippo', 'Triângulo Otis', 3),
   ('leti', 'Letícia', 'Lanches', 4),
-  ('matilde_alves', 'Matilde', 'A Falhada', 4),
+  ('matilde_alves', 'Matilde Alves', 'KARPA FLÁVIA: A FALHADA', 4),
   ('kika_rocha', 'Kika Rocha', null, 4),
   ('mini_rita', 'Mini Rita', 'Kréu', 4),
   ('rui_jorge', 'Rui Jorge', 'Dora', 4),

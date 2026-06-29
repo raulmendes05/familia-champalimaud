@@ -46,7 +46,7 @@ const NAMES = [
   ['marta', 'Marta', ''],
   ['pippo', 'Pippo', 'Triângulo Otis'],
   ['leti', 'Letícia', 'Lanches'],
-  ['matilde_alves', 'Matilde', 'A Falhada'],
+  ['matilde_alves', 'Matilde Alves', 'KARPA FLÁVIA: A FALHADA'],
   ['kika_rocha', 'Kika Rocha', ''],
   ['mini_rita', 'Mini Rita', 'Kréu'],
   ['rui_jorge', 'Rui Jorge', 'Dora'],
