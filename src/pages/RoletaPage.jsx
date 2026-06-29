@@ -1,9 +1,12 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { useMembers } from '../hooks/useMembers'
+import FamilyTree from '../components/FamilyTree'
+import MemberPanel from '../components/MemberPanel'
 import { ELIMINATIONS, ROULETTE_EXCLUDED, eliminationMap, dateOfDay } from '../data/roleta'
+import { lineageOf } from '../utils/tree'
 
 export default function RoletaPage() {
-  const { members } = useMembers()
+  const { members, relationships } = useMembers()
   const byId = useMemo(() => new Map(members.map((m) => [m.id, m])), [members])
   const elimMap = useMemo(() => eliminationMap(), [])
 
@@ -18,75 +21,154 @@ export default function RoletaPage() {
   const timeline = ELIMINATIONS.map((id, i) => ({ day: i + 1, member: id ? byId.get(id) : null }))
     .reverse()
 
+  // ── Vista (lista vs árvore dos vivos) + estado da árvore ──
+  const [view, setView] = useState('lista')
+  const [selected, setSelected] = useState(null)
+  const [lineageId, setLineageId] = useState(null)
+  const [secondaryShown, setSecondaryShown] = useState(() => new Set())
+
+  const lineageIds = useMemo(
+    () => (lineageId ? new Set(lineageOf(lineageId, relationships)) : null),
+    [lineageId, relationships]
+  )
+  const toggleLineage = (id) => setLineageId((cur) => (cur === id ? null : id))
+  const toggleSecondary = (id) =>
+    setSecondaryShown((prev) => {
+      const next = new Set(prev)
+      next.has(id) ? next.delete(id) : next.add(id)
+      return next
+    })
+
   return (
-    <div className="mx-auto h-full w-full max-w-5xl overflow-y-auto p-6">
-      <div className="mb-5">
+    <div className="relative flex h-full w-full flex-col">
+      {/* Cabeçalho + alternador */}
+      <div className="mx-auto w-full max-w-5xl px-6 pt-6">
         <h1 className="font-display text-3xl font-semibold text-champi-gold">🎰 Roleta Champi</h1>
         <p className="mt-1 text-sm text-champi-text-dim">
           Todos os dias alguém é “expulso” da família (tudo na brincadeira). Aqui ficam os
           sobreviventes e a cronologia das eliminações.{' '}
           <span className="text-champi-text-dim/40 italic">O m0guels tem isto tudo comprado!</span>
         </p>
-      </div>
 
-      {/* Estatísticas */}
-      <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <Stat value={dia} label="Dia atual" />
-        <Stat value={survivors.length} label="Sobreviventes" tone="green" />
-        <Stat value={participants.length - survivors.length} label="Eliminados" tone="red" />
-        <Stat value={participants.length} label="Na roleta" />
-      </div>
-
-      {/* Sobreviventes */}
-      <section className="mb-8">
-        <h2 className="mb-3 border-b border-champi-line pb-2 font-display text-xl font-semibold text-champi-text">
-          🟢 Ainda na família · {survivors.length}
-        </h2>
-        <div className="grid grid-cols-3 gap-3 sm:grid-cols-5 md:grid-cols-7">
-          {survivors.map((m) => (
-            <div key={m.id} className="flex flex-col items-center text-center">
-              <Avatar member={m} />
-              <p className="mt-1 w-full truncate text-xs font-medium text-champi-text">{m.name}</p>
-            </div>
-          ))}
+        <div className="mt-4 inline-flex items-center gap-1.5 rounded-xl border border-champi-line bg-champi-ink-2/80 p-1.5 backdrop-blur">
+          <ViewBtn active={view === 'lista'} onClick={() => setView('lista')}>
+            📜 Lista
+          </ViewBtn>
+          <ViewBtn active={view === 'arvore'} onClick={() => setView('arvore')}>
+            🌳 Árvore dos vivos
+          </ViewBtn>
         </div>
-      </section>
+      </div>
 
-      {/* Timeline */}
-      <section>
-        <h2 className="mb-3 border-b border-champi-line pb-2 font-display text-xl font-semibold text-champi-text">
-          ⚰️ Eliminados · cronologia
-        </h2>
-        <ol className="relative ml-3 border-l-2 border-champi-line">
-          {timeline.map(({ day, member }) => (
-            <li key={day} className="mb-4 ml-5">
-              <span className="absolute -left-[11px] mt-3 grid h-5 w-5 place-items-center rounded-full bg-champi-ink-3 text-[9px] font-bold text-champi-gold ring-2 ring-champi-line">
-                {day}
-              </span>
-              <div className="card flex items-center gap-3 p-2.5">
-                <Avatar member={member} dead />
-                <div className="min-w-0 flex-1">
-                  <p className="truncate font-display font-semibold text-champi-text">
-                    {member ? member.name : '??? (por confirmar)'}
-                  </p>
-                  {member?.nickname && (
-                    <p className="truncate text-xs text-champi-text-dim">“{member.nickname}”</p>
-                  )}
+      {view === 'lista' ? (
+        <div className="mx-auto w-full max-w-5xl flex-1 overflow-y-auto px-6 pb-6 pt-5">
+          {/* Estatísticas */}
+          <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <Stat value={dia} label="Dia atual" />
+            <Stat value={survivors.length} label="Sobreviventes" tone="green" />
+            <Stat value={participants.length - survivors.length} label="Eliminados" tone="red" />
+            <Stat value={participants.length} label="Na roleta" />
+          </div>
+
+          {/* Sobreviventes */}
+          <section className="mb-8">
+            <h2 className="mb-3 border-b border-champi-line pb-2 font-display text-xl font-semibold text-champi-text">
+              🟢 Ainda na família · {survivors.length}
+            </h2>
+            <div className="grid grid-cols-3 gap-3 sm:grid-cols-5 md:grid-cols-7">
+              {survivors.map((m) => (
+                <div key={m.id} className="flex flex-col items-center text-center">
+                  <Avatar member={m} />
+                  <p className="mt-1 w-full truncate text-xs font-medium text-champi-text">{m.name}</p>
                 </div>
-                <div className="text-right">
-                  <p className="text-sm font-semibold text-champi-gold">Dia {day}</p>
-                  {dateOfDay(day) && (
-                    <p className="text-[10px] text-champi-text-dim">
-                      {dateOfDay(day).toLocaleDateString('pt-PT', { day: '2-digit', month: 'short' })}
-                    </p>
-                  )}
-                </div>
-              </div>
-            </li>
-          ))}
-        </ol>
-      </section>
+              ))}
+            </div>
+          </section>
+
+          {/* Timeline */}
+          <section>
+            <h2 className="mb-3 border-b border-champi-line pb-2 font-display text-xl font-semibold text-champi-text">
+              ⚰️ Eliminados · cronologia
+            </h2>
+            <ol className="relative ml-3 border-l-2 border-champi-line">
+              {timeline.map(({ day, member }) => (
+                <li key={day} className="mb-4 ml-5">
+                  <span className="absolute -left-[11px] mt-3 grid h-5 w-5 place-items-center rounded-full bg-champi-ink-3 text-[9px] font-bold text-champi-gold ring-2 ring-champi-line">
+                    {day}
+                  </span>
+                  <div className="card flex items-center gap-3 p-2.5">
+                    <Avatar member={member} dead />
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate font-display font-semibold text-champi-text">
+                        {member ? member.name : '??? (por confirmar)'}
+                      </p>
+                      {member?.nickname && (
+                        <p className="truncate text-xs text-champi-text-dim">“{member.nickname}”</p>
+                      )}
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-semibold text-champi-gold">Dia {day}</p>
+                      {dateOfDay(day) && (
+                        <p className="text-[10px] text-champi-text-dim">
+                          {dateOfDay(day).toLocaleDateString('pt-PT', { day: '2-digit', month: 'short' })}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </section>
+        </div>
+      ) : (
+        <div className="relative mt-3 flex-1 overflow-hidden border-t border-champi-line/60">
+          {survivors.length > 0 ? (
+            <FamilyTree
+              members={survivors}
+              relationships={relationships}
+              selectedId={selected?.id || null}
+              secondaryShown={secondaryShown}
+              lineageIds={lineageIds}
+              onSelect={setSelected}
+            />
+          ) : (
+            <p className="grid h-full place-items-center text-sm text-champi-text-dim">
+              Já não resta ninguém vivo na roleta. 💀
+            </p>
+          )}
+
+          {/* Legenda */}
+          <div className="pointer-events-none absolute left-4 top-4 rounded-lg border border-champi-line bg-champi-ink-2/80 px-3 py-1.5 text-xs text-champi-text-dim backdrop-blur">
+            🌳 {survivors.length} ainda vivos · só quem sobrevive à roleta
+          </div>
+
+          <MemberPanel
+            member={selected}
+            members={members}
+            relationships={relationships}
+            secondaryShown={secondaryShown}
+            onToggleSecondary={toggleSecondary}
+            lineageActive={lineageId === selected?.id}
+            onToggleLineage={toggleLineage}
+            onSelect={setSelected}
+            onClose={() => setSelected(null)}
+          />
+        </div>
+      )}
     </div>
+  )
+}
+
+function ViewBtn({ active, onClick, children }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`rounded-lg px-3 py-1.5 text-sm font-medium transition ${
+        active ? 'bg-champi-gold text-champi-ink' : 'text-champi-text-dim hover:text-champi-text'
+      }`}
+    >
+      {children}
+    </button>
   )
 }
 
