@@ -66,6 +66,18 @@ export default function Stats({ members, relationships, onSelect, allSecondaryOn
         </div>
       )}
 
+      {/* Membro aleatório */}
+      {members.length > 0 && (
+        <button
+          onClick={() => onSelect(members[Math.floor(Math.random() * members.length)])}
+          className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg border border-champi-line
+            px-3 py-2 text-sm font-medium text-champi-text transition hover:border-champi-gold/60 hover:text-champi-gold"
+        >
+          <span className="text-base leading-none">🎲</span>
+          Membro aleatório
+        </button>
+      )}
+
       {/* Grau de separação */}
       <div className="mt-4 border-t border-champi-line pt-3">
         <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-champi-text-dim">
