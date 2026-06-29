@@ -5,7 +5,7 @@
 // (null = ainda por confirmar quem é.)
 
 // Quem NÃO entra na roleta (entraram na família mais tarde).
-export const ROULETTE_EXCLUDED = ['andre', 'bia_wood']
+export const ROULETTE_EXCLUDED = ['andre', 'bia_wood', 'leonor_catarino', 'guilherme']
 
 // Data do Dia 1 (opcional) — para mostrar datas reais na timeline.
 // Ex.: '2026-05-01'. Deixar null mostra só "Dia N".
