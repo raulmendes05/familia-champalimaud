@@ -145,6 +145,25 @@ export function badgesFor(member, members, relationships) {
     })
   }
 
+  // 🗣️ Alcunha lendária — uma das ~5 alcunhas mais compridas da família.
+  const myNick = (member.nickname || '').trim()
+  if (myNick) {
+    const lengths = members
+      .map((mm) => (mm.nickname || '').trim().length)
+      .filter((n) => n > 0)
+      .sort((a, b) => b - a)
+    const threshold = lengths[Math.min(4, lengths.length - 1)] || Infinity
+    if (myNick.length >= threshold) {
+      out.push({
+        key: 'alcunha_lendaria',
+        emoji: '🗣️',
+        label: 'Alcunha lendária',
+        desc: 'Uma das alcunhas mais épicas (e compridas) da família.',
+        color: '#e8c969',
+      })
+    }
+  }
+
   return out
 }
 
