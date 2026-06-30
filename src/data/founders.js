@@ -16,5 +16,8 @@ export const isFounder = (id) => FOUNDER_ORDER.includes(id)
 // Nome "carinhoso" de cada linhagem — usado, por ex., como etiqueta-raiz na
 // árvore dos vivos quando o fundador já caiu na roleta.
 export const LINEAGE_LABELS = {
+  ping: 'Pinginhos',
+  jajonhe: 'Jajonhinhos',
   grizo: 'Grizinhos',
+  hugo: 'Huguinhos',
 }
