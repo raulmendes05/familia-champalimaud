@@ -5,7 +5,6 @@ import SearchBar from '../components/SearchBar'
 import Stats from '../components/Stats'
 import { useMembers } from '../hooks/useMembers'
 import { lineageOf } from '../utils/tree'
-import { badgeEmojis } from '../utils/badges'
 
 export default function TreePage() {
   const { members, relationships, loading } = useMembers()
@@ -28,11 +27,6 @@ export default function TreePage() {
     [lineageId, relationships]
   )
 
-  const badgesById = useMemo(() => {
-    const o = {}
-    for (const m of members) o[m.id] = badgeEmojis(m, members, relationships, 3)
-    return o
-  }, [members, relationships])
   const toggleLineage = (id) => setLineageId((cur) => (cur === id ? null : id))
 
   const toggleSecondary = (id) =>
@@ -85,7 +79,6 @@ export default function TreePage() {
         dimGenerations={dimGenerations}
         secondaryShown={secondaryShown}
         lineageIds={lineageIds}
-        badgesById={badgesById}
         onSelect={handleSelect}
       />
 
