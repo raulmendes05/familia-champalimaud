@@ -73,7 +73,7 @@ export default function MemberPanel({
               {member.name}
             </p>
             {member.nickname && (
-              <p className="truncate text-sm text-champi-text">“{member.nickname}”</p>
+              <p className="break-words text-sm text-champi-text">“{member.nickname}”</p>
             )}
             <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
               <span className="chip">Gen {member.generation}</span>
