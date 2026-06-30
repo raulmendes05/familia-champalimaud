@@ -5,6 +5,7 @@ import { founderOf } from '../utils/tree'
 import { fileToScaledDataURL } from '../utils/photos'
 import { updateMember } from '../lib/supabase'
 import FounderBadge from '../components/FounderBadge'
+import { FOUNDER_ORDER, FOUNDER_BADGES, LINEAGE_LABELS } from '../data/founders'
 
 const GEN_LABEL = {
   1: 'Geração 1 · Fundadores',
@@ -44,7 +45,10 @@ export default function GenerationsPage() {
         </p>
       </div>
 
-      <GenChart byGen={byGen} total={members.length} />
+      <div className="mb-8 grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <GenChart byGen={byGen} total={members.length} />
+        <LineageDonut members={members} founderById={founderById} />
+      </div>
 
       <div className="space-y-10">
         {byGen.map(([gen, list]) => (
@@ -78,7 +82,7 @@ function GenChart({ byGen, total }) {
   if (!byGen.length) return null
   const max = Math.max(...byGen.map(([, l]) => l.length))
   return (
-    <div className="card mb-8 p-5">
+    <div className="card p-5">
       <div className="mb-4 flex items-baseline justify-between">
         <h2 className="font-display text-lg font-semibold text-champi-text">Membros por geração</h2>
         <span className="text-sm text-champi-text-dim">{total} no total</span>
@@ -101,6 +105,76 @@ function GenChart({ byGen, total }) {
             </div>
           )
         })}
+      </div>
+    </div>
+  )
+}
+
+function LineageDonut({ members, founderById }) {
+  const byId = new Map(members.map((m) => [m.id, m]))
+  const counts = new Map()
+  for (const m of members) {
+    const f = founderById.get(m.id)
+    if (f) counts.set(f, (counts.get(f) || 0) + 1)
+  }
+  const data = FOUNDER_ORDER.map((id) => ({
+    id,
+    label: LINEAGE_LABELS[id] || byId.get(id)?.name || id,
+    color: FOUNDER_BADGES[id]?.color || '#a98bff',
+    count: counts.get(id) || 0,
+  })).filter((d) => d.count > 0)
+
+  const total = data.reduce((s, d) => s + d.count, 0)
+  if (!total) return null
+
+  const r = 52
+  const c = 2 * Math.PI * r
+  let acc = 0
+
+  return (
+    <div className="card p-5">
+      <h2 className="mb-4 font-display text-lg font-semibold text-champi-text">Membros por linhagem</h2>
+      <div className="flex items-center gap-5">
+        <svg width="140" height="140" viewBox="0 0 140 140" className="shrink-0">
+          <g transform="rotate(-90 70 70)">
+            <circle cx="70" cy="70" r={r} fill="none" stroke="#241634" strokeWidth="20" />
+            {data.map((d) => {
+              const dash = (d.count / total) * c
+              const seg = (
+                <circle
+                  key={d.id}
+                  cx="70"
+                  cy="70"
+                  r={r}
+                  fill="none"
+                  stroke={d.color}
+                  strokeWidth="20"
+                  strokeDasharray={`${dash} ${c - dash}`}
+                  strokeDashoffset={-acc}
+                />
+              )
+              acc += dash
+              return seg
+            })}
+          </g>
+          <text x="70" y="66" textAnchor="middle" className="fill-champi-text" fontSize="22" fontWeight="700">
+            {total}
+          </text>
+          <text x="70" y="84" textAnchor="middle" className="fill-champi-text-dim" fontSize="10">
+            membros
+          </text>
+        </svg>
+        <ul className="flex-1 space-y-1.5 text-sm">
+          {data.map((d) => (
+            <li key={d.id} className="flex items-center gap-2">
+              <span className="h-3 w-3 shrink-0 rounded-full" style={{ background: d.color }} />
+              <span className="flex-1 text-champi-text">{d.label}</span>
+              <span className="text-champi-text-dim">
+                {d.count} · {Math.round((d.count / total) * 100)}%
+              </span>
+            </li>
+          ))}
+        </ul>
       </div>
     </div>
   )
