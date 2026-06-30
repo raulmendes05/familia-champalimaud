@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { useMembers } from '../hooks/useMembers'
 import {
   buildAdjacency,
@@ -55,8 +56,29 @@ export default function CompatibilidadePage() {
   )
   const byId = useMemo(() => new Map(members.map((m) => [m.id, m])), [members])
   const adj = useMemo(() => buildAdjacency(members, relationships), [members, relationships])
-  const [aId, setAId] = useState('')
-  const [bId, setBId] = useState('')
+  const [params, setParams] = useSearchParams()
+  const [aId, setAId] = useState(params.get('a') || '')
+  const [bId, setBId] = useState(params.get('b') || '')
+  const [copied, setCopied] = useState(false)
+
+  // Mantém o URL em sincronia com a seleção (link partilhável).
+  useEffect(() => {
+    const next = {}
+    if (aId) next.a = aId
+    if (bId) next.b = bId
+    setParams(next, { replace: true })
+    setCopied(false)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [aId, bId])
+
+  const copyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href)
+      setCopied(true)
+    } catch {
+      /* ignore */
+    }
+  }
 
   const result = useMemo(() => {
     if (!aId || !bId || aId === bId) return null
@@ -193,6 +215,10 @@ export default function CompatibilidadePage() {
                 ))}
               </ul>
             )}
+
+            <button onClick={copyLink} className="btn-ghost mt-5 w-full">
+              {copied ? '✓ Link copiado!' : '🔗 Copiar link deste par'}
+            </button>
           </div>
         </div>
       )}

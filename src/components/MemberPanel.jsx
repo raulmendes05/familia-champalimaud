@@ -24,6 +24,8 @@ export default function MemberPanel({
   onToggleLineage = () => {},
   onSelect,
   onClose,
+  showTreeActions = true,
+  className = 'card animate-fade-in absolute right-4 top-4 z-20 flex max-h-[calc(100%-2rem)] w-[340px] flex-col overflow-hidden shadow-glow',
 }) {
   if (!member) return null
   const { padrinhos, afilhados, irmaos } = relationsOf(member.id, members, relationships)
@@ -44,10 +46,7 @@ export default function MemberPanel({
   const secondaryOn = secondaryShown ? secondaryShown.has(member.id) : false
 
   return (
-    <aside
-      className="card animate-fade-in absolute right-4 top-4 z-20 flex max-h-[calc(100%-2rem)] w-[340px]
-        flex-col overflow-hidden shadow-glow"
-    >
+    <aside className={className}>
       {/* Cabeçalho */}
       <div className="relative bg-gradient-to-br from-champi-purple-deep/60 to-champi-ink-3 p-5">
         <button
@@ -122,23 +121,25 @@ export default function MemberPanel({
         <Field label="Faculdade" value={FACULDADES[member.faculty] || member.faculty} />
         {member.bio && <Field label="Sobre" value={member.bio} />}
 
-        <button
-          onClick={() => onToggleLineage(member.id)}
-          className={`flex w-full items-center justify-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition ${
-            lineageActive
-              ? 'border-champi-purple bg-champi-purple/20 text-champi-purple-soft'
-              : 'border-champi-purple/50 text-champi-purple-soft hover:bg-champi-purple/10'
-          }`}
-        >
-          <span className="text-base leading-none">🧬</span>
-          {lineageActive
-            ? 'Esconder linhagem'
-            : `Ver linhagem${founderName ? ` (até ${founderName})` : ''}`}
-        </button>
+        {showTreeActions && (
+          <button
+            onClick={() => onToggleLineage(member.id)}
+            className={`flex w-full items-center justify-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition ${
+              lineageActive
+                ? 'border-champi-purple bg-champi-purple/20 text-champi-purple-soft'
+                : 'border-champi-purple/50 text-champi-purple-soft hover:bg-champi-purple/10'
+            }`}
+          >
+            <span className="text-base leading-none">🧬</span>
+            {lineageActive
+              ? 'Esconder linhagem'
+              : `Ver linhagem${founderName ? ` (até ${founderName})` : ''}`}
+          </button>
+        )}
 
         <RelGroup title="Padrinhos" items={padrinhos} onSelect={onSelect} />
 
-        {secondParents.length > 0 && (
+        {showTreeActions && secondParents.length > 0 && (
           <button
             onClick={() => onToggleSecondary(member.id)}
             className={`flex w-full items-center justify-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition ${

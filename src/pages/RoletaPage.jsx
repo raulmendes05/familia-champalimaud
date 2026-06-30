@@ -4,6 +4,7 @@ import FamilyTree from '../components/FamilyTree'
 import MemberPanel from '../components/MemberPanel'
 import { ELIMINATIONS, ROULETTE_EXCLUDED, eliminationMap, dateOfDay } from '../data/roleta'
 import { lineageOf } from '../utils/tree'
+import { badgeEmojis } from '../utils/badges'
 import { isFounder, LINEAGE_LABELS } from '../data/founders'
 
 export default function RoletaPage() {
@@ -72,6 +73,12 @@ export default function RoletaPage() {
     () => (lineageId ? new Set(lineageOf(lineageId, relationships)) : null),
     [lineageId, relationships]
   )
+
+  const badgesById = useMemo(() => {
+    const o = {}
+    for (const m of members) o[m.id] = badgeEmojis(m, members, relationships, 3)
+    return o
+  }, [members, relationships])
   const toggleLineage = (id) => setLineageId((cur) => (cur === id ? null : id))
   const toggleSecondary = (id) =>
     setSecondaryShown((prev) => {
@@ -172,6 +179,7 @@ export default function RoletaPage() {
               lineageIds={lineageIds}
               ghostIds={ghostIds}
               ghostLabels={ghostLabels}
+              badgesById={badgesById}
               onSelect={setSelected}
             />
           ) : (

@@ -147,3 +147,14 @@ export function badgesFor(member, members, relationships) {
 
   return out
 }
+
+/**
+ * Emojis dos badges para mostrar de forma compacta (nós da árvore, cartões).
+ * Exclui o de fundador (já é mostrado em separado) e limita a `max`.
+ */
+export function badgeEmojis(member, members, relationships, max = 3) {
+  return badgesFor(member, members, relationships)
+    .filter((b) => b.key !== 'fundador')
+    .slice(0, max)
+    .map((b) => b.emoji)
+}

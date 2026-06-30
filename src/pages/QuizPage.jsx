@@ -177,12 +177,26 @@ export default function QuizPage() {
     return { members, relationships, byId, withNick, primaryParent, afilhados, elimMap: eliminationMap() }
   }, [members, relationships])
 
+  const LIMIT = 10
+  const [mode, setMode] = useState('livre') // 'livre' | 'desafio'
+  const [finished, setFinished] = useState(false)
   const [question, setQuestion] = useState(null)
   const [selected, setSelected] = useState(null)
   const [score, setScore] = useState(0)
   const [round, setRound] = useState(0)
   const [streak, setStreak] = useState(0)
   const [best, setBest] = useState(0)
+
+  const resetGame = (newMode) => {
+    setMode(newMode)
+    setScore(0)
+    setRound(0)
+    setStreak(0)
+    setBest(0)
+    setSelected(null)
+    setFinished(false)
+    setQuestion(makeQuestion(data))
+  }
 
   // primeira pergunta assim que os dados estão prontos
   useEffect(() => {
@@ -207,8 +221,26 @@ export default function QuizPage() {
   }
 
   const next = () => {
+    if (mode === 'desafio' && round >= LIMIT) {
+      setFinished(true)
+      return
+    }
     setSelected(null)
     setQuestion(makeQuestion(data))
+  }
+
+  const share = async () => {
+    const url = window.location.origin + '/quiz'
+    const text = `Fiz ${score}/${LIMIT} no Quiz Champi 🧠 Tenta bater-me!`
+    try {
+      if (navigator.share) await navigator.share({ title: 'Quiz Champi', text, url })
+      else {
+        await navigator.clipboard.writeText(`${text} ${url}`)
+        alert('Resultado copiado para a área de transferência!')
+      }
+    } catch {
+      /* utilizador cancelou */
+    }
   }
 
   if (!question) {
@@ -222,19 +254,59 @@ export default function QuizPage() {
   const answered = selected !== null
   const correct = answered && selected === question.answer
 
+  // Ecrã final do modo desafio
+  if (finished) {
+    const pct = Math.round((score / LIMIT) * 100)
+    const verdict =
+      pct >= 90 ? '🏆 Lenda da Champi!' : pct >= 60 ? '👏 Nada mau!' : pct >= 30 ? '🙂 Dá para melhorar.' : '😬 Vê lá se estudas a árvore!'
+    return (
+      <div className="mx-auto grid h-full w-full max-w-2xl place-items-center p-6">
+        <div className="card animate-fade-in w-full p-8 text-center">
+          <p className="text-sm uppercase tracking-wide text-champi-text-dim">Resultado</p>
+          <p className="my-2 font-display text-6xl font-bold text-champi-gold">
+            {score}/{LIMIT}
+          </p>
+          <p className="text-lg text-champi-text">{verdict}</p>
+          <div className="mt-6 flex justify-center gap-2">
+            <button onClick={() => resetGame('desafio')} className="btn-ghost">
+              🔁 Jogar outra vez
+            </button>
+            <button onClick={share} className="btn-gold">
+              📤 Partilhar resultado
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="mx-auto h-full w-full max-w-2xl overflow-y-auto p-6">
-      <div className="mb-4">
-        <h1 className="font-display text-3xl font-semibold text-champi-gold">🧠 Quiz Champi</h1>
-        <p className="mt-1 text-sm text-champi-text-dim">
-          Quão bem conheces a família? Acertas na alcunha, no padrinho, na geração…?
-        </p>
+      <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="font-display text-3xl font-semibold text-champi-gold">🧠 Quiz Champi</h1>
+          <p className="mt-1 text-sm text-champi-text-dim">
+            Quão bem conheces a família? Acertas na alcunha, no padrinho, na geração…?
+          </p>
+        </div>
+        <div className="inline-flex items-center gap-1.5 rounded-xl border border-champi-line bg-champi-ink-2/80 p-1.5">
+          <ModeBtn active={mode === 'livre'} onClick={() => resetGame('livre')}>
+            ∞ Livre
+          </ModeBtn>
+          <ModeBtn active={mode === 'desafio'} onClick={() => resetGame('desafio')}>
+            🎯 Desafio (10)
+          </ModeBtn>
+        </div>
       </div>
 
       {/* Placar */}
       <div className="mb-5 grid grid-cols-3 gap-3">
         <Score value={`${score}/${round}`} label="Pontos" />
-        <Score value={streak} label="Seguidos" tone="gold" />
+        {mode === 'desafio' ? (
+          <Score value={`${Math.min(round + (answered ? 0 : 1), LIMIT)}/${LIMIT}`} label="Pergunta" tone="gold" />
+        ) : (
+          <Score value={streak} label="Seguidos" tone="gold" />
+        )}
         <Score value={best} label="Recorde" />
       </div>
 
@@ -291,12 +363,25 @@ export default function QuizPage() {
               {correct ? '🎉 Certo!' : '❌ Falhaste essa.'}
             </p>
             <button onClick={next} className="btn-gold">
-              Próxima →
+              {mode === 'desafio' && round >= LIMIT ? 'Ver resultado →' : 'Próxima →'}
             </button>
           </div>
         )}
       </div>
     </div>
+  )
+}
+
+function ModeBtn({ active, onClick, children }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`rounded-lg px-3 py-1.5 text-sm font-medium transition ${
+        active ? 'bg-champi-gold text-champi-ink' : 'text-champi-text-dim hover:text-champi-text'
+      }`}
+    >
+      {children}
+    </button>
   )
 }
 

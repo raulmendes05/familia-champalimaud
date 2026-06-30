@@ -35,6 +35,7 @@ export default function FamilyTree({
   lineageIds = null,
   ghostIds = null,
   ghostLabels = null,
+  badgesById = null,
   onSelect = () => {},
 }) {
   const svgRef = useRef(null)
@@ -239,6 +240,11 @@ export default function FamilyTree({
                   {m?.nickname && (
                     <text x={52} y={38} fontSize={9} fill={COLORS.textDim}>
                       {truncate(m.nickname, 18)}
+                    </text>
+                  )}
+                  {badgesById && badgesById[d.data.id]?.length > 0 && (
+                    <text x={NODE_W - 6} y={14} textAnchor="end" fontSize={11}>
+                      {badgesById[d.data.id].join(' ')}
                     </text>
                   )}
                   {founder &&

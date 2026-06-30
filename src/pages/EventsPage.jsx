@@ -46,6 +46,27 @@ export default function EventsPage() {
   const [error, setError] = useState(null)
   const [open, setOpen] = useState(null) // evento aberto (detalhe)
   const [creating, setCreating] = useState(false)
+  const [q, setQ] = useState('')
+  const [year, setYear] = useState('')
+
+  const years = [
+    ...new Set(events.map((e) => e.event_date && e.event_date.slice(0, 4)).filter(Boolean)),
+  ].sort((a, b) => b.localeCompare(a))
+
+  const shown = events.filter((e) => {
+    const t = q.trim().toLowerCase()
+    if (
+      t &&
+      !(
+        e.title.toLowerCase().includes(t) ||
+        (e.description || '').toLowerCase().includes(t) ||
+        (e.location || '').toLowerCase().includes(t)
+      )
+    )
+      return false
+    if (year && (e.event_date || '').slice(0, 4) !== year) return false
+    return true
+  })
 
   const reload = () => {
     setLoading(true)
@@ -105,6 +126,31 @@ export default function EventsPage() {
         />
       )}
 
+      {!loading && !error && events.length > 0 && (
+        <div className="mb-4 flex flex-wrap gap-2">
+          <input
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="Pesquisar eventos…"
+            className="min-w-[180px] flex-1 rounded-lg border border-champi-line bg-champi-ink/70 px-3 py-2 text-sm text-champi-text placeholder:text-champi-text-dim focus:border-champi-gold/60 focus:outline-none"
+          />
+          {years.length > 0 && (
+            <select
+              value={year}
+              onChange={(e) => setYear(e.target.value)}
+              className="rounded-lg border border-champi-line bg-champi-ink-3/70 px-3 py-2 text-sm text-champi-text focus:border-champi-gold/60 focus:outline-none"
+            >
+              <option value="">Todos os anos</option>
+              {years.map((y) => (
+                <option key={y} value={y}>
+                  {y}
+                </option>
+              ))}
+            </select>
+          )}
+        </div>
+      )}
+
       {loading ? (
         <p className="mt-10 text-center text-sm text-champi-text-dim">A carregar eventos…</p>
       ) : error ? (
@@ -113,9 +159,13 @@ export default function EventsPage() {
         <p className="mt-10 text-center text-sm text-champi-text-dim">
           Ainda não há eventos. {email ? 'Cria o primeiro!' : 'Entra para criar o primeiro!'}
         </p>
+      ) : shown.length === 0 ? (
+        <p className="mt-10 text-center text-sm text-champi-text-dim">
+          Nenhum evento corresponde à pesquisa.
+        </p>
       ) : (
         <ul className="space-y-3">
-          {events.map((ev) => (
+          {shown.map((ev) => (
             <li key={ev.id}>
               <button
                 onClick={() => setOpen(ev)}
