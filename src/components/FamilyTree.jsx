@@ -34,6 +34,7 @@ export default function FamilyTree({
   secondaryShown = null,
   lineageIds = null,
   ghostIds = null,
+  ghostLabels = null,
   onSelect = () => {},
 }) {
   const svgRef = useRef(null)
@@ -151,6 +152,43 @@ export default function FamilyTree({
               const founder = isFounder(d.data.id) ? FOUNDER_BADGES[d.data.id] : null
               const glyph = founder && glyphFor(founder.icon)
               const stroke = isSelected ? COLORS.gold : isSearchHit ? COLORS.purpleSoft : COLORS.line
+
+              // Nó-fantasma (ex.: fundador caído): NÃO mostra o membro, só uma
+              // etiqueta-raiz da linhagem; as linhas dos descendentes apontam aqui.
+              if (isGhost) {
+                const label = (ghostLabels && ghostLabels[d.data.id]) || `Linhagem ${m?.name || ''}`
+                const w = Math.max(72, label.length * 7.6 + 24)
+                const h = 28
+                return (
+                  <g
+                    key={d.data.id}
+                    transform={`translate(${p.x - w / 2}, ${p.y - h / 2})`}
+                    opacity={isDimmed ? 0.28 : 1}
+                    style={{ transition: 'opacity 0.2s' }}
+                  >
+                    <rect
+                      width={w}
+                      height={h}
+                      rx={14}
+                      fill={COLORS.panel}
+                      stroke={COLORS.goldSoft}
+                      strokeWidth={1.4}
+                      strokeDasharray="5 4"
+                    />
+                    <text
+                      x={w / 2}
+                      y={h / 2 + 4}
+                      textAnchor="middle"
+                      fontSize={12.5}
+                      fontWeight="700"
+                      fontStyle="italic"
+                      fill={COLORS.goldSoft}
+                    >
+                      {label}
+                    </text>
+                  </g>
+                )
+              }
               return (
                 <g
                   key={d.data.id}
@@ -213,18 +251,6 @@ export default function FamilyTree({
                         {founder.emoji}
                       </text>
                     ))}
-                  {isGhost && (
-                    <text
-                      x={NODE_W / 2}
-                      y={NODE_H + 15}
-                      textAnchor="middle"
-                      fontSize={10.5}
-                      fontWeight="600"
-                      fill={COLORS.goldSoft}
-                    >
-                      ⚰️ Linhagem {truncate(m?.name, 12)}
-                    </text>
-                  )}
                 </g>
               )
             })}

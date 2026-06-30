@@ -4,7 +4,7 @@ import FamilyTree from '../components/FamilyTree'
 import MemberPanel from '../components/MemberPanel'
 import { ELIMINATIONS, ROULETTE_EXCLUDED, eliminationMap, dateOfDay } from '../data/roleta'
 import { lineageOf } from '../utils/tree'
-import { isFounder } from '../data/founders'
+import { isFounder, LINEAGE_LABELS } from '../data/founders'
 
 export default function RoletaPage() {
   const { members, relationships } = useMembers()
@@ -33,7 +33,7 @@ export default function RoletaPage() {
   // mesma descendência. EXCEÇÃO: um fundador eliminado continua a aparecer (como
   // "caído", a cinzento) a servir de raiz, para que a descendência viva dele
   // continue claramente identificada como sua.
-  const { treeMembers, treeRels, ghostIds } = useMemo(() => {
+  const { treeMembers, treeRels, ghostIds, ghostLabels } = useMemo(() => {
     const aliveSet = new Set(survivors.map((m) => m.id))
 
     // Fundadores eliminados que ainda têm descendência viva → mantidos como raiz.
@@ -62,7 +62,9 @@ export default function RoletaPage() {
     }
 
     const ghostMembers = [...ghost].map((id) => byId.get(id)).filter(Boolean)
-    return { treeMembers: [...survivors, ...ghostMembers], treeRels: rels, ghostIds: ghost }
+    const labels = {}
+    for (const id of ghost) labels[id] = LINEAGE_LABELS[id] || `Linhagem ${byId.get(id)?.name || ''}`
+    return { treeMembers: [...survivors, ...ghostMembers], treeRels: rels, ghostIds: ghost, ghostLabels: labels }
     // survivors/relationships mudam a cada eliminação → recomputa
   }, [survivors, relationships, byId])
 
@@ -169,6 +171,7 @@ export default function RoletaPage() {
               secondaryShown={secondaryShown}
               lineageIds={lineageIds}
               ghostIds={ghostIds}
+              ghostLabels={ghostLabels}
               onSelect={setSelected}
             />
           ) : (
@@ -180,7 +183,7 @@ export default function RoletaPage() {
           {/* Legenda */}
           <div className="pointer-events-none absolute left-4 top-4 rounded-lg border border-champi-line bg-champi-ink-2/80 px-3 py-1.5 text-xs text-champi-text-dim backdrop-blur">
             🌳 {survivors.length} ainda vivos · só quem sobrevive à roleta
-            {ghostIds.size > 0 && <span> · ⚰️ raiz = linhagem de fundador caído</span>}
+            {ghostIds.size > 0 && <span> · etiqueta = linhagem de fundador caído</span>}
           </div>
 
           <MemberPanel
