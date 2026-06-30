@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useMembers } from '../hooks/useMembers'
-import { founderOf } from '../utils/tree'
 import { FOUNDER_ORDER } from '../data/founders'
 import { eliminationMap } from '../data/roleta'
 
@@ -63,12 +62,12 @@ const GENERATORS = [
       answer: opts.indexOf(subject),
     }
   },
-  // 3) padrinho/madrinha de X
+  // 3) padrinho/madrinha de X — só quem tem UM padrinho (senão há várias respostas)
   (d) => {
-    const kids = d.members.filter((m) => d.primaryParent.has(m.id))
+    const kids = d.members.filter((m) => (d.parentsOf.get(m.id) || []).length === 1)
     if (kids.length < 1) return null
     const subject = pick(kids)
-    const parent = d.byId.get(d.primaryParent.get(subject.id))
+    const parent = d.byId.get(d.parentsOf.get(subject.id)[0])
     if (!parent) return null
     const pool = d.members.filter((m) => m.id !== subject.id)
     const dist = distractors(pool, parent, (m) => m.name, 3)
@@ -117,12 +116,14 @@ const GENERATORS = [
       answer: opts.indexOf(subject.generation),
     }
   },
-  // 6) linhagem (fundador)
+  // 6) linhagem (fundador) — só quem pertence a UMA linhagem (sem co-fundadores)
   (d) => {
-    const pool = d.members.filter((m) => !FOUNDER_ORDER.includes(m.id))
+    const pool = d.members.filter(
+      (m) => !FOUNDER_ORDER.includes(m.id) && (d.foundersOf.get(m.id)?.size === 1)
+    )
     if (pool.length < 1) return null
     const subject = pick(pool)
-    const fId = founderOf(subject.id, d.relationships)
+    const fId = [...d.foundersOf.get(subject.id)][0]
     if (!fId || !d.byId.has(fId)) return null
     const opts = shuffle(FOUNDER_ORDER)
     return {
@@ -168,13 +169,48 @@ export default function QuizPage() {
       if (VERT.has(r.type) && !primaryParent.has(r.child_id))
         primaryParent.set(r.child_id, r.parent_id)
     const kidsOf = new Map()
+    const parentsOf = new Map() // child → TODOS os padrinhos/madrinhas (inclui co-padrinhos)
     for (const r of relationships) {
       if (!VERT.has(r.type)) continue
       if (!kidsOf.has(r.parent_id)) kidsOf.set(r.parent_id, new Set())
       kidsOf.get(r.parent_id).add(r.child_id)
+      if (!parentsOf.has(r.child_id)) parentsOf.set(r.child_id, [])
+      parentsOf.get(r.child_id).push(r.parent_id)
     }
     const afilhados = new Map([...kidsOf].map(([k, s]) => [k, s.size]))
-    return { members, relationships, byId, withNick, primaryParent, afilhados, elimMap: eliminationMap() }
+
+    // Todas as linhagens (fundadores) alcançáveis por cada membro, subindo por
+    // TODOS os padrinhos. >1 = pertence a várias linhagens.
+    const founderSet = new Set(FOUNDER_ORDER)
+    const foundersOf = new Map()
+    for (const m of members) {
+      const found = new Set()
+      const seen = new Set([m.id])
+      const stack = [m.id]
+      while (stack.length) {
+        const cur = stack.pop()
+        if (cur !== m.id && founderSet.has(cur)) found.add(cur)
+        for (const p of parentsOf.get(cur) || []) {
+          if (!seen.has(p)) {
+            seen.add(p)
+            stack.push(p)
+          }
+        }
+      }
+      foundersOf.set(m.id, found)
+    }
+
+    return {
+      members,
+      relationships,
+      byId,
+      withNick,
+      primaryParent,
+      parentsOf,
+      foundersOf,
+      afilhados,
+      elimMap: eliminationMap(),
+    }
   }, [members, relationships])
 
   const LIMIT = 10
