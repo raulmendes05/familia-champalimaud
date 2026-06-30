@@ -49,3 +49,97 @@ export async function updateMember(id, patch) {
   if (error) throw error
   return data
 }
+
+// ── Eventos ──────────────────────────────────────────────────────────────────
+// Leitura: a RLS já só devolve eventos aprovados (e os pendentes ao admin).
+export async function fetchEvents() {
+  if (!supabase) throw new Error('Supabase não configurado.')
+  const { data, error } = await supabase
+    .from('events')
+    .select('*')
+    .order('event_date', { ascending: false, nullsFirst: false })
+    .order('created_at', { ascending: false })
+  if (error) throw error
+  return data
+}
+
+export async function createEvent(event) {
+  if (!supabase) throw new Error('Supabase não configurado.')
+  const { data, error } = await supabase
+    .from('events')
+    .insert({ ...event, status: 'pending' })
+    .select()
+    .single()
+  if (error) throw error
+  return data
+}
+
+export async function approveEvent(id) {
+  if (!supabase) throw new Error('Supabase não configurado.')
+  const { error } = await supabase.from('events').update({ status: 'approved' }).eq('id', id)
+  if (error) throw error
+}
+
+export async function deleteEvent(id) {
+  if (!supabase) throw new Error('Supabase não configurado.')
+  const { error } = await supabase.from('events').delete().eq('id', id)
+  if (error) throw error
+}
+
+export async function fetchEventComments(eventId) {
+  if (!supabase) throw new Error('Supabase não configurado.')
+  const { data, error } = await supabase
+    .from('event_comments')
+    .select('*')
+    .eq('event_id', eventId)
+    .order('created_at', { ascending: true })
+  if (error) throw error
+  return data
+}
+
+export async function addEventComment(eventId, authorName, text) {
+  if (!supabase) throw new Error('Supabase não configurado.')
+  const { data, error } = await supabase
+    .from('event_comments')
+    .insert({ event_id: eventId, author_name: authorName, text })
+    .select()
+    .single()
+  if (error) throw error
+  return data
+}
+
+export async function fetchEventPhotos(eventId) {
+  if (!supabase) throw new Error('Supabase não configurado.')
+  const { data, error } = await supabase
+    .from('event_photos')
+    .select('*')
+    .eq('event_id', eventId)
+    .order('created_at', { ascending: false })
+  if (error) throw error
+  return data
+}
+
+/** Carrega o ficheiro para o Storage e devolve o URL público. */
+export async function uploadEventPhoto(eventId, file) {
+  if (!supabase) throw new Error('Supabase não configurado.')
+  const ext = (file.name.split('.').pop() || 'jpg').toLowerCase()
+  const path = `${eventId}/${crypto.randomUUID()}.${ext}`
+  const { error: upErr } = await supabase.storage.from('event-photos').upload(path, file, {
+    cacheControl: '3600',
+    upsert: false,
+  })
+  if (upErr) throw upErr
+  const { data } = supabase.storage.from('event-photos').getPublicUrl(path)
+  return data.publicUrl
+}
+
+export async function addEventPhoto(eventId, authorName, url, caption) {
+  if (!supabase) throw new Error('Supabase não configurado.')
+  const { data, error } = await supabase
+    .from('event_photos')
+    .insert({ event_id: eventId, author_name: authorName, url, caption })
+    .select()
+    .single()
+  if (error) throw error
+  return data
+}

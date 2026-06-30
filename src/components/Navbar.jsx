@@ -41,6 +41,9 @@ export default function Navbar() {
         <NavLink to="/quiz" className={linkClass}>
           Quiz
         </NavLink>
+        <NavLink to="/eventos" className={linkClass}>
+          Eventos
+        </NavLink>
         {isAdmin ? (
           <div className="ml-1 flex items-center gap-1.5">
             <span className="rounded-full bg-champi-gold/15 px-2 py-1 text-xs font-medium text-champi-gold">
