@@ -28,6 +28,9 @@ const GEN2_RANK = {
 // Exceções: membros sem grau hierárquico, mesmo que a geração indicasse um.
 const NO_RANK = new Set(['sissi', 'maria_p'])
 
+// Alcunhas lendárias escolhidas à mão (além das mais compridas).
+const LEGENDARY_NICK = new Set(['gabriel', 'ximenes'])
+
 function childrenMap(relationships) {
   const m = new Map()
   for (const r of relationships) {
@@ -145,7 +148,7 @@ export function badgesFor(member, members, relationships) {
     })
   }
 
-  // 🗣️ Alcunha lendária — uma das ~5 alcunhas mais compridas da família.
+  // 🗣️ Alcunha lendária — top ~5 alcunhas mais compridas + escolhidos à mão.
   const myNick = (member.nickname || '').trim()
   if (myNick) {
     const lengths = members
@@ -153,7 +156,7 @@ export function badgesFor(member, members, relationships) {
       .filter((n) => n > 0)
       .sort((a, b) => b - a)
     const threshold = lengths[Math.min(4, lengths.length - 1)] || Infinity
-    if (myNick.length >= threshold) {
+    if (myNick.length >= threshold || LEGENDARY_NICK.has(member.id)) {
       out.push({
         key: 'alcunha_lendaria',
         emoji: '🗣️',
