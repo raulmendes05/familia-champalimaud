@@ -44,6 +44,8 @@ export default function GenerationsPage() {
         </p>
       </div>
 
+      <GenChart byGen={byGen} total={members.length} />
+
       <div className="space-y-10">
         {byGen.map(([gen, list]) => (
           <section key={gen}>
@@ -67,6 +69,38 @@ export default function GenerationsPage() {
             </div>
           </section>
         ))}
+      </div>
+    </div>
+  )
+}
+
+function GenChart({ byGen, total }) {
+  if (!byGen.length) return null
+  const max = Math.max(...byGen.map(([, l]) => l.length))
+  return (
+    <div className="card mb-8 p-5">
+      <div className="mb-4 flex items-baseline justify-between">
+        <h2 className="font-display text-lg font-semibold text-champi-text">Membros por geração</h2>
+        <span className="text-sm text-champi-text-dim">{total} no total</span>
+      </div>
+      <div className="space-y-2.5">
+        {byGen.map(([gen, list]) => {
+          const n = list.length
+          const pct = max ? Math.round((n / max) * 100) : 0
+          return (
+            <div key={gen} className="flex items-center gap-3">
+              <span className="w-16 shrink-0 text-xs text-champi-text-dim">Gen {gen}</span>
+              <div className="h-5 flex-1 overflow-hidden rounded-full bg-champi-ink-3">
+                <div
+                  className="flex h-full items-center justify-end rounded-full bg-gradient-to-r from-champi-purple to-champi-gold pr-2 transition-all duration-500"
+                  style={{ width: `${Math.max(pct, 6)}%` }}
+                >
+                  <span className="text-[10px] font-bold text-champi-ink">{n}</span>
+                </div>
+              </div>
+            </div>
+          )
+        })}
       </div>
     </div>
   )
