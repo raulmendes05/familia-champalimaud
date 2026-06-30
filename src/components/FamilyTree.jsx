@@ -156,12 +156,12 @@ export default function FamilyTree({
                   key={d.data.id}
                   transform={`translate(${p.x - NODE_W / 2}, ${p.y - NODE_H / 2})`}
                   className="cursor-pointer"
-                  opacity={isDimmed ? 0.28 : isGhost ? 0.6 : 1}
+                  opacity={isDimmed ? 0.28 : 1}
                   onClick={(e) => {
                     e.stopPropagation()
                     onSelect(m)
                   }}
-                  style={{ transition: 'opacity 0.2s', filter: isGhost ? 'grayscale(1)' : undefined }}
+                  style={{ transition: 'opacity 0.2s' }}
                 >
                   <rect
                     width={NODE_W}
@@ -214,8 +214,15 @@ export default function FamilyTree({
                       </text>
                     ))}
                   {isGhost && (
-                    <text x={NODE_W - 6} y={16} textAnchor="end" fontSize={13}>
-                      ⚰️
+                    <text
+                      x={NODE_W / 2}
+                      y={NODE_H + 15}
+                      textAnchor="middle"
+                      fontSize={10.5}
+                      fontWeight="600"
+                      fill={COLORS.goldSoft}
+                    >
+                      ⚰️ Linhagem {truncate(m?.name, 12)}
                     </text>
                   )}
                 </g>

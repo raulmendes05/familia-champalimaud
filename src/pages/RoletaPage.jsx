@@ -180,7 +180,7 @@ export default function RoletaPage() {
           {/* Legenda */}
           <div className="pointer-events-none absolute left-4 top-4 rounded-lg border border-champi-line bg-champi-ink-2/80 px-3 py-1.5 text-xs text-champi-text-dim backdrop-blur">
             🌳 {survivors.length} ainda vivos · só quem sobrevive à roleta
-            {ghostIds.size > 0 && <span> · ⚰️ fundador caído mantido como raiz</span>}
+            {ghostIds.size > 0 && <span> · ⚰️ raiz = linhagem de fundador caído</span>}
           </div>
 
           <MemberPanel
