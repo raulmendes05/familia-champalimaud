@@ -33,6 +33,7 @@ export default function FamilyTree({
   dimGenerations = null,
   secondaryShown = null,
   lineageIds = null,
+  ghostIds = null,
   onSelect = () => {},
 }) {
   const svgRef = useRef(null)
@@ -146,6 +147,7 @@ export default function FamilyTree({
               const m = d.data.member
               const { isSelected, isSearchHit, isDimmed } = nodeState(d)
               const photo = m?.photo_url
+              const isGhost = ghostIds ? ghostIds.has(d.data.id) : false
               const founder = isFounder(d.data.id) ? FOUNDER_BADGES[d.data.id] : null
               const glyph = founder && glyphFor(founder.icon)
               const stroke = isSelected ? COLORS.gold : isSearchHit ? COLORS.purpleSoft : COLORS.line
@@ -154,12 +156,12 @@ export default function FamilyTree({
                   key={d.data.id}
                   transform={`translate(${p.x - NODE_W / 2}, ${p.y - NODE_H / 2})`}
                   className="cursor-pointer"
-                  opacity={isDimmed ? 0.28 : 1}
+                  opacity={isDimmed ? 0.28 : isGhost ? 0.6 : 1}
                   onClick={(e) => {
                     e.stopPropagation()
                     onSelect(m)
                   }}
-                  style={{ transition: 'opacity 0.2s' }}
+                  style={{ transition: 'opacity 0.2s', filter: isGhost ? 'grayscale(1)' : undefined }}
                 >
                   <rect
                     width={NODE_W}
@@ -211,6 +213,11 @@ export default function FamilyTree({
                         {founder.emoji}
                       </text>
                     ))}
+                  {isGhost && (
+                    <text x={NODE_W - 6} y={16} textAnchor="end" fontSize={13}>
+                      ⚰️
+                    </text>
+                  )}
                 </g>
               )
             })}

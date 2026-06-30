@@ -62,6 +62,7 @@ export const ELIMINATIONS = [
   'tommy',         // Dia 48 — Tomé
   'maria_p',       // Dia 49 — Maria Pereira
   'munha',         // Dia 50 — Munhá
+  'grizo',         // Dia 51 — Grizo (fundador)
 ]
 
 /** Map id → dia (1-based) dos eliminados. */

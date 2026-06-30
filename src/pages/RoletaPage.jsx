@@ -4,6 +4,7 @@ import FamilyTree from '../components/FamilyTree'
 import MemberPanel from '../components/MemberPanel'
 import { ELIMINATIONS, ROULETTE_EXCLUDED, eliminationMap, dateOfDay } from '../data/roleta'
 import { lineageOf } from '../utils/tree'
+import { isFounder } from '../data/founders'
 
 export default function RoletaPage() {
   const { members, relationships } = useMembers()
@@ -27,17 +28,28 @@ export default function RoletaPage() {
   const [lineageId, setLineageId] = useState(null)
   const [secondaryShown, setSecondaryShown] = useState(() => new Set())
 
-  // Ligações da árvore dos vivos: cada sobrevivente liga-se ao antepassado VIVO
-  // mais próximo na sua linhagem primária (saltando padrinhos já eliminados),
-  // para manter a mesma descendência mesmo sem o padrinho direto.
-  const treeRels = useMemo(() => {
+  // Árvore dos vivos: cada sobrevivente liga-se ao antepassado VIVO mais próximo
+  // na sua linhagem primária (saltando padrinhos já eliminados), para manter a
+  // mesma descendência. EXCEÇÃO: um fundador eliminado continua a aparecer (como
+  // "caído", a cinzento) a servir de raiz, para que a descendência viva dele
+  // continue claramente identificada como sua.
+  const { treeMembers, treeRels, ghostIds } = useMemo(() => {
     const aliveSet = new Set(survivors.map((m) => m.id))
-    const out = []
+
+    // Fundadores eliminados que ainda têm descendência viva → mantidos como raiz.
+    const ghost = new Set()
+    for (const m of survivors) {
+      const fId = lineageOf(m.id, relationships)[0]
+      if (fId && isFounder(fId) && !aliveSet.has(fId)) ghost.add(fId)
+    }
+
+    const attach = new Set([...aliveSet, ...ghost])
+    const rels = []
     for (const m of survivors) {
       const lin = lineageOf(m.id, relationships) // [fundador, …, m]
       for (let i = lin.length - 2; i >= 0; i--) {
-        if (aliveSet.has(lin[i])) {
-          out.push({
+        if (attach.has(lin[i])) {
+          rels.push({
             id: `s-${lin[i]}-${m.id}`,
             parent_id: lin[i],
             child_id: m.id,
@@ -48,9 +60,11 @@ export default function RoletaPage() {
         }
       }
     }
-    return out
+
+    const ghostMembers = [...ghost].map((id) => byId.get(id)).filter(Boolean)
+    return { treeMembers: [...survivors, ...ghostMembers], treeRels: rels, ghostIds: ghost }
     // survivors/relationships mudam a cada eliminação → recomputa
-  }, [survivors, relationships])
+  }, [survivors, relationships, byId])
 
   const lineageIds = useMemo(
     () => (lineageId ? new Set(lineageOf(lineageId, relationships)) : null),
@@ -149,11 +163,12 @@ export default function RoletaPage() {
         <div className="relative mt-3 flex-1 overflow-hidden border-t border-champi-line/60">
           {survivors.length > 0 ? (
             <FamilyTree
-              members={survivors}
+              members={treeMembers}
               relationships={treeRels}
               selectedId={selected?.id || null}
               secondaryShown={secondaryShown}
               lineageIds={lineageIds}
+              ghostIds={ghostIds}
               onSelect={setSelected}
             />
           ) : (
@@ -165,6 +180,7 @@ export default function RoletaPage() {
           {/* Legenda */}
           <div className="pointer-events-none absolute left-4 top-4 rounded-lg border border-champi-line bg-champi-ink-2/80 px-3 py-1.5 text-xs text-champi-text-dim backdrop-blur">
             🌳 {survivors.length} ainda vivos · só quem sobrevive à roleta
+            {ghostIds.size > 0 && <span> · ⚰️ fundador caído mantido como raiz</span>}
           </div>
 
           <MemberPanel
