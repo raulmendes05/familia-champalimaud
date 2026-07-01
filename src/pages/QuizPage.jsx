@@ -214,21 +214,15 @@ export default function QuizPage() {
   }, [members, relationships])
 
   const LIMIT = 10
-  const [mode, setMode] = useState('livre') // 'livre' | 'desafio'
   const [finished, setFinished] = useState(false)
   const [question, setQuestion] = useState(null)
   const [selected, setSelected] = useState(null)
   const [score, setScore] = useState(0)
   const [round, setRound] = useState(0)
-  const [streak, setStreak] = useState(0)
-  const [best, setBest] = useState(0)
 
-  const resetGame = (newMode) => {
-    setMode(newMode)
+  const resetGame = () => {
     setScore(0)
     setRound(0)
-    setStreak(0)
-    setBest(0)
     setSelected(null)
     setFinished(false)
     setQuestion(makeQuestion(data))
@@ -244,20 +238,11 @@ export default function QuizPage() {
     if (selected !== null || !question) return
     setSelected(i)
     setRound((r) => r + 1)
-    if (i === question.answer) {
-      setScore((s) => s + 1)
-      setStreak((st) => {
-        const n = st + 1
-        setBest((b) => Math.max(b, n))
-        return n
-      })
-    } else {
-      setStreak(0)
-    }
+    if (i === question.answer) setScore((s) => s + 1)
   }
 
   const next = () => {
-    if (mode === 'desafio' && round >= LIMIT) {
+    if (round >= LIMIT) {
       setFinished(true)
       return
     }
@@ -304,7 +289,7 @@ export default function QuizPage() {
           </p>
           <p className="text-lg text-champi-text">{verdict}</p>
           <div className="mt-6 flex justify-center gap-2">
-            <button onClick={() => resetGame('desafio')} className="btn-ghost">
+            <button onClick={resetGame} className="btn-ghost">
               🔁 Jogar outra vez
             </button>
             <button onClick={share} className="btn-gold">
@@ -318,32 +303,21 @@ export default function QuizPage() {
 
   return (
     <div className="mx-auto h-full w-full max-w-2xl overflow-y-auto p-6">
-      <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="font-display text-3xl font-semibold text-champi-gold">🧠 Quiz Champi</h1>
-          <p className="mt-1 text-sm text-champi-text-dim">
-            Quão bem conheces a família? Acertas na alcunha, no padrinho, na geração…?
-          </p>
-        </div>
-        <div className="inline-flex items-center gap-1.5 rounded-xl border border-champi-line bg-champi-ink-2/80 p-1.5">
-          <ModeBtn active={mode === 'livre'} onClick={() => resetGame('livre')}>
-            ∞ Livre
-          </ModeBtn>
-          <ModeBtn active={mode === 'desafio'} onClick={() => resetGame('desafio')}>
-            🎯 Desafio (10)
-          </ModeBtn>
-        </div>
+      <div className="mb-4">
+        <h1 className="font-display text-3xl font-semibold text-champi-gold">🧠 Quiz Champi · Desafio</h1>
+        <p className="mt-1 text-sm text-champi-text-dim">
+          10 perguntas sobre a família. Vê quantas acertas!
+        </p>
       </div>
 
       {/* Placar */}
-      <div className="mb-5 grid grid-cols-3 gap-3">
-        <Score value={`${score}/${round}`} label="Pontos" />
-        {mode === 'desafio' ? (
-          <Score value={`${Math.min(round + (answered ? 0 : 1), LIMIT)}/${LIMIT}`} label="Pergunta" tone="gold" />
-        ) : (
-          <Score value={streak} label="Seguidos" tone="gold" />
-        )}
-        <Score value={best} label="Recorde" />
+      <div className="mb-5 grid grid-cols-2 gap-3">
+        <Score value={score} label="Acertos" />
+        <Score
+          value={`${Math.min(round + (answered ? 0 : 1), LIMIT)}/${LIMIT}`}
+          label="Pergunta"
+          tone="gold"
+        />
       </div>
 
       {/* Pergunta */}
@@ -399,25 +373,12 @@ export default function QuizPage() {
               {correct ? '🎉 Certo!' : '❌ Falhaste essa.'}
             </p>
             <button onClick={next} className="btn-gold">
-              {mode === 'desafio' && round >= LIMIT ? 'Ver resultado →' : 'Próxima →'}
+              {round >= LIMIT ? 'Ver resultado →' : 'Próxima →'}
             </button>
           </div>
         )}
       </div>
     </div>
-  )
-}
-
-function ModeBtn({ active, onClick, children }) {
-  return (
-    <button
-      onClick={onClick}
-      className={`rounded-lg px-3 py-1.5 text-sm font-medium transition ${
-        active ? 'bg-champi-gold text-champi-ink' : 'text-champi-text-dim hover:text-champi-text'
-      }`}
-    >
-      {children}
-    </button>
   )
 }
 
