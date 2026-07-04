@@ -64,6 +64,9 @@ export const ELIMINATIONS = [
   'munha',         // Dia 50 — Munhá
   'grizo',         // Dia 51 — Grizo (fundador)
   'sassa',         // Dia 52 — Sassa
+  'migueleo',      // Dia 53 — Miguel Sousa
+  'carol',         // Dia 54 — Carol Sampaio
+  'carvalheira',   // Dia 55 — Nuno Carvalheira
 ]
 
 /** Map id → dia (1-based) dos eliminados. */
