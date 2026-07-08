@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { useMembers } from '../hooks/useMembers'
 import FamilyTree from '../components/FamilyTree'
 import MemberPanel from '../components/MemberPanel'
-import { ELIMINATIONS, ROULETTE_EXCLUDED, eliminationMap, dateOfDay } from '../data/roleta'
+import { ELIMINATIONS, ROULETTE_EXCLUDED, ELIMINATION_NOTES, eliminationMap, dateOfDay } from '../data/roleta'
 import { lineageOf } from '../utils/tree'
 import { isFounder, LINEAGE_LABELS } from '../data/founders'
 
@@ -19,8 +19,11 @@ export default function RoletaPage() {
   const dia = ELIMINATIONS.length
 
   // timeline: do mais recente para o mais antigo
-  const timeline = ELIMINATIONS.map((id, i) => ({ day: i + 1, member: id ? byId.get(id) : null }))
-    .reverse()
+  const timeline = ELIMINATIONS.map((id, i) => ({
+    day: i + 1,
+    member: id ? byId.get(id) : null,
+    note: ELIMINATION_NOTES[i + 1] || null,
+  })).reverse()
 
   // ── Vista (lista vs árvore dos vivos) + estado da árvore ──
   const [view, setView] = useState('lista')
@@ -133,7 +136,7 @@ export default function RoletaPage() {
               ⚰️ Eliminados · cronologia
             </h2>
             <ol className="relative ml-3 border-l-2 border-champi-line">
-              {timeline.map(({ day, member }) => (
+              {timeline.map(({ day, member, note }) => (
                 <li key={day} className="mb-4 ml-5">
                   <span className="absolute -left-[11px] mt-3 grid h-5 w-5 place-items-center rounded-full bg-champi-ink-3 text-[9px] font-bold text-champi-gold ring-2 ring-champi-line">
                     {day}
@@ -146,6 +149,9 @@ export default function RoletaPage() {
                       </p>
                       {member?.nickname && (
                         <p className="truncate text-xs text-champi-text-dim">“{member.nickname}”</p>
+                      )}
+                      {note && (
+                        <p className="mt-0.5 text-[11px] italic text-champi-gold/70">💬 {note}</p>
                       )}
                     </div>
                     <div className="text-right">
