@@ -1,6 +1,7 @@
 import { relationsOf, founderOf } from '../utils/tree'
 import { badgesFor } from '../utils/badges'
 import { FACULDADES, memories } from '../data/mockData'
+import { MEMBER_NOTES } from '../data/memberNotes'
 import { FOUNDER_BADGES } from '../data/founders'
 import FounderBadge from './FounderBadge'
 
@@ -90,6 +91,15 @@ export default function MemberPanel({
           <p className="border-l-2 border-champi-gold/70 pl-3 font-display text-lg italic text-champi-text">
             “{member.quote}”
           </p>
+        )}
+
+        {MEMBER_NOTES[member.id] && (
+          <div className="rounded-lg border border-champi-line/70 bg-champi-ink-3/50 p-3">
+            <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-champi-text-dim">
+              Curiosidades
+            </p>
+            <p className="text-sm text-champi-text">{MEMBER_NOTES[member.id]}</p>
+          </div>
         )}
 
         {badges.length > 0 && (

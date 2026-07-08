@@ -77,21 +77,13 @@ export const ELIMINATIONS = [
 // Chave = número do dia.
 export const ELIMINATION_NOTES = {
   2: 'ao balcão',
-  6: 'vegetariano',
-  8: 'natural de Torres',
   9: 'palavras / latas',
   19: 'o fake',
-  27: 'também natural de Torres',
-  29: 'careca',
   30: 'de chinelo',
-  31: 'Foz Côa',
   35: 'não ganhou',
   39: 'já não há balcão',
   40: 'de jato',
-  48: 'charlie kirk, tomé, tomate, pomodoro, lareiras, marido da erika, tom sawyer, to, t, silva santos, arca de tomé',
-  52: 'Salvador Maria',
-  55: 'criminoso',
-  56: 'Wux',
+  59: 'a das fotos',
 }
 
 /** Map id → dia (1-based) dos eliminados. */
