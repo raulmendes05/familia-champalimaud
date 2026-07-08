@@ -14,5 +14,5 @@ export const MEMBER_NOTES = {
   hugo: 'Nome real: Hugo Cardoso. Também tratado por “Wux”.',
   tommy:
     'Nome real: Tomás Silva Santos. Também conhecido por: Charlie Kirk, Tomé, Tomate, Pomodoro, ' +
-    'Lareiras, Marido da Erika, Tom Sawyer, Tó, T, Silva Santos, Arca de Tomé.',
+    'Lareiras, Marido da Erika, Tom Sawyer, Tó, T, Silva Santos, Arca de Tomé, Hernâni.',
 }
