@@ -71,6 +71,7 @@ export const ELIMINATIONS = [
   'ping',          // Dia 57 — Ping (fundador)
   'barriga',       // Dia 58 — Barriga
   'nanda',         // Dia 59 — Nanda
+  'tiago_soares',  // Dia 60 — Tiago Soares
 ]
 
 // Notas/comentários da roleta por dia (o que foi dito no sorteio de cada dia).
