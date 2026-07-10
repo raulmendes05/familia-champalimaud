@@ -72,6 +72,7 @@ export const ELIMINATIONS = [
   'barriga',       // Dia 58 — Barriga
   'nanda',         // Dia 59 — Nanda
   'tiago_soares',  // Dia 60 — Tiago Soares
+  'sofia_l',       // Dia 61 — Sofia Solista
 ]
 
 // Notas/comentários da roleta por dia (o que foi dito no sorteio de cada dia).
