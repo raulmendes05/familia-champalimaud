@@ -73,6 +73,8 @@ export const ELIMINATIONS = [
   'nanda',         // Dia 59 — Nanda
   'tiago_soares',  // Dia 60 — Tiago Soares
   'sofia_l',       // Dia 61 — Sofia Solista
+  'eva',           // Dia 62 — Eva
+  'jajonhe',       // Dia 63 — Jajonhe (fundador)
 ]
 
 // Notas/comentários da roleta por dia (o que foi dito no sorteio de cada dia).

@@ -3,6 +3,7 @@
 // comentários do sorteio de cada dia, em roleta.js).
 export const MEMBER_NOTES = {
   nanda: 'Nome real: Fernanda Miranda.',
+  jajonhe: 'Nome real: João André Pedro Francisco.',
   moguels: 'Vegetariano.',
   rodolfo: 'Natural de Torres.',
   leonor_mendes: 'Natural de Torres.',
