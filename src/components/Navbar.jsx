@@ -15,7 +15,7 @@ export default function Navbar() {
   return (
     <header className="z-30 flex items-center justify-between border-b border-champi-line/70 bg-champi-ink-2/80 px-4 py-2.5 backdrop-blur">
       <div className="flex items-center gap-2.5">
-        <img src="/champi.svg" alt="" className="h-8 w-8" />
+        <img src="/brasao.png" alt="Brasão Champi" className="h-9 w-9 rounded-lg object-cover ring-1 ring-champi-line" />
         <div className="leading-tight">
           <p className="font-display text-lg font-semibold text-champi-gold">Família Champalimaud</p>
           <p className="text-[10px] uppercase tracking-[0.2em] text-champi-text-dim">Árvore Champi</p>
