@@ -75,6 +75,7 @@ export const ELIMINATIONS = [
   'sofia_l',       // Dia 61 — Sofia Solista
   'eva',           // Dia 62 — Eva
   'jajonhe',       // Dia 63 — Jajonhe (fundador)
+  'ximenes',       // Dia 64 — Ximenes
 ]
 
 // Notas/comentários da roleta por dia (o que foi dito no sorteio de cada dia).
