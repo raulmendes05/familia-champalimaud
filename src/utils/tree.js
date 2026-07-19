@@ -195,6 +195,33 @@ export function founderOf(memberId, relationships) {
   return lineageOf(memberId, relationships)[0]
 }
 
+/**
+ * TODOS os fundadores de quem o membro descende, seguindo TODAS as ligações de
+ * padrinho/madrinha (inclui co-padrinhos). Ex.: a descendência do Gomes (co-
+ * apadrinhado por Ping e Jajonhe) pertence às duas linhagens. Um "fundador" é
+ * um membro sem padrinhos (raiz da árvore). Devolve um array de ids.
+ */
+export function allFoundersOf(memberId, relationships) {
+  const parentsOf = new Map()
+  for (const r of relationships) {
+    if (!VERTICAL_TYPES.has(r.type)) continue
+    if (!parentsOf.has(r.child_id)) parentsOf.set(r.child_id, [])
+    parentsOf.get(r.child_id).push(r.parent_id)
+  }
+  const founders = new Set()
+  const seen = new Set()
+  const stack = [memberId]
+  while (stack.length) {
+    const cur = stack.pop()
+    if (seen.has(cur)) continue
+    seen.add(cur)
+    const parents = parentsOf.get(cur)
+    if (!parents || parents.length === 0) founders.add(cur) // raiz = fundador
+    else for (const p of parents) stack.push(p)
+  }
+  return [...founders]
+}
+
 /** Relações directas de um membro, agrupadas para o painel de perfil. */
 export function relationsOf(memberId, members, relationships) {
   const byId = indexMembers(members)
@@ -229,12 +256,12 @@ export function computeStats(members, relationships) {
 
   const padrinhoCount = relationships.filter((r) => VERTICAL_TYPES.has(r.type)).length
 
-  // Fundadores ordenados por nº de descendentes (sobe pela linhagem primária).
+  // Fundadores ordenados por nº de descendentes (por TODAS as linhagens — um
+  // membro com co-padrinhos de fundadores diferentes conta para ambos).
   const descCount = new Map()
   for (const m of members) {
-    const founder = founderOf(m.id, relationships)
-    if (founder && founder !== m.id) {
-      descCount.set(founder, (descCount.get(founder) || 0) + 1)
+    for (const founder of allFoundersOf(m.id, relationships)) {
+      if (founder !== m.id) descCount.set(founder, (descCount.get(founder) || 0) + 1)
     }
   }
   const foundersRanking = [...descCount.entries()]

@@ -1,7 +1,7 @@
 import { useMemo, useRef, useState } from 'react'
 import { useMembers } from '../hooks/useMembers'
 import { useAuth } from '../hooks/useAuth'
-import { founderOf } from '../utils/tree'
+import { founderOf, allFoundersOf } from '../utils/tree'
 import { fileToScaledDataURL } from '../utils/photos'
 import { updateMember } from '../lib/supabase'
 import FounderBadge from '../components/FounderBadge'
@@ -22,6 +22,13 @@ export default function GenerationsPage() {
   const founderById = useMemo(() => {
     const map = new Map()
     for (const m of members) map.set(m.id, founderOf(m.id, relationships))
+    return map
+  }, [members, relationships])
+
+  // Todas as linhagens de cada membro (co-padrinhos incluídos) — para o donut.
+  const foundersById = useMemo(() => {
+    const map = new Map()
+    for (const m of members) map.set(m.id, allFoundersOf(m.id, relationships))
     return map
   }, [members, relationships])
 
@@ -47,7 +54,7 @@ export default function GenerationsPage() {
 
       <div className="mb-8 grid grid-cols-1 gap-4 lg:grid-cols-2">
         <GenChart byGen={byGen} total={members.length} />
-        <LineageDonut members={members} founderById={founderById} />
+        <LineageDonut members={members} foundersById={foundersById} />
       </div>
 
       <div className="space-y-10">
@@ -110,12 +117,12 @@ function GenChart({ byGen, total }) {
   )
 }
 
-function LineageDonut({ members, founderById }) {
+function LineageDonut({ members, foundersById }) {
   const byId = new Map(members.map((m) => [m.id, m]))
   const counts = new Map()
+  // Cada membro conta em TODAS as suas linhagens (co-padrinhos → duas linhagens).
   for (const m of members) {
-    const f = founderById.get(m.id)
-    if (f) counts.set(f, (counts.get(f) || 0) + 1)
+    for (const f of foundersById.get(m.id) || []) counts.set(f, (counts.get(f) || 0) + 1)
   }
   const data = FOUNDER_ORDER.map((id) => ({
     id,
@@ -133,7 +140,12 @@ function LineageDonut({ members, founderById }) {
 
   return (
     <div className="card p-5">
-      <h2 className="mb-4 font-display text-lg font-semibold text-champi-text">Membros por linhagem</h2>
+      <div className="mb-4">
+        <h2 className="font-display text-lg font-semibold text-champi-text">Membros por linhagem</h2>
+        <p className="text-[11px] text-champi-text-dim">
+          quem tem co-padrinhos conta nas duas linhagens
+        </p>
+      </div>
       <div className="flex items-center gap-5">
         <svg width="140" height="140" viewBox="0 0 140 140" className="shrink-0">
           <g transform="rotate(-90 70 70)">
@@ -158,7 +170,7 @@ function LineageDonut({ members, founderById }) {
             })}
           </g>
           <text x="70" y="66" textAnchor="middle" className="fill-champi-text" fontSize="22" fontWeight="700">
-            {total}
+            {members.length}
           </text>
           <text x="70" y="84" textAnchor="middle" className="fill-champi-text-dim" fontSize="10">
             membros

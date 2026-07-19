@@ -1,8 +1,8 @@
-import { relationsOf, founderOf } from '../utils/tree'
+import { relationsOf, founderOf, allFoundersOf } from '../utils/tree'
 import { badgesFor } from '../utils/badges'
 import { FACULDADES, memories } from '../data/mockData'
 import { MEMBER_NOTES } from '../data/memberNotes'
-import { FOUNDER_BADGES } from '../data/founders'
+import { FOUNDER_BADGES, FOUNDER_ORDER } from '../data/founders'
 import FounderBadge from './FounderBadge'
 
 const TYPE_LABEL = {
@@ -35,6 +35,9 @@ export default function MemberPanel({
   const founderId = founderOf(member.id, relationships)
   const founder = FOUNDER_BADGES[founderId]
   const founderName = byId(founderId)?.name || founder?.label
+  // Todas as linhagens (co-padrinhos → várias), pela ordem canónica dos fundadores.
+  const allFounders = allFoundersOf(member.id, relationships)
+  const founderIds = FOUNDER_ORDER.filter((id) => allFounders.includes(id) && FOUNDER_BADGES[id])
   const badges = badgesFor(member, members, relationships)
   const photo = member.photo_url
 
@@ -79,7 +82,9 @@ export default function MemberPanel({
             <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
               <span className="chip">Gen {member.generation}</span>
               {member.year_joined && <span className="chip">{member.year_joined}</span>}
-              {founder && <FounderBadge founderId={founderId} size={14} showLabel />}
+              {founderIds.map((id) => (
+                <FounderBadge key={id} founderId={id} size={14} showLabel />
+              ))}
             </div>
           </div>
         </div>
