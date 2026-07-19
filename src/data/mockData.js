@@ -112,7 +112,7 @@ const NAMES = [
 const PADRINHOS = [
   ['carvalheira', ['ping']],
   ['andre', ['ping']],
-  ['gomes', ['ping', 'jajonhe']],
+  ['gomes', ['jajonhe', 'ping']],
   ['piri', ['jajonhe']],
   ['bras', ['jajonhe']],
   ['clara', ['jajonhe']],
