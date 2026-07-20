@@ -6,6 +6,7 @@ export const MEMBER_NOTES = {
   jajonhe: 'Nome real: João André Pedro Francisco.',
   ximenes: 'Nome real: Pedro Ximenes.',
   tildes: 'Nome real: Matilde Bernardino.',
+  joaozinho: 'Nome real: João Afonso Gomes.',
   moguels: 'Vegetariano.',
   rodolfo: 'Natural de Torres.',
   leonor_mendes: 'Natural de Torres.',
