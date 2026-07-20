@@ -82,6 +82,7 @@ export const ELIMINATIONS = [
   'joao_dias',     // Dia 68 — João Dias
   'rita_pais',     // Dia 69 — Rita Pais
   'morgana',       // Dia 70 — Morgana
+  'joaozinho',     // Dia 71 — Joãozinho
 ]
 
 // Notas/comentários da roleta por dia (o que foi dito no sorteio de cada dia).
