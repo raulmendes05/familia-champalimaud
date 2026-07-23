@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { useMembers } from '../hooks/useMembers'
 import FamilyTree from '../components/FamilyTree'
 import MemberPanel from '../components/MemberPanel'
+import Oraculo from '../components/Oraculo'
 import { ELIMINATIONS, ROULETTE_EXCLUDED, ELIMINATION_NOTES, eliminationMap, dateOfDay } from '../data/roleta'
 import { lineageOf } from '../utils/tree'
 import { isFounder, LINEAGE_LABELS } from '../data/founders'
@@ -102,10 +103,17 @@ export default function RoletaPage() {
           <ViewBtn active={view === 'arvore'} onClick={() => setView('arvore')}>
             🌳 Árvore dos vivos
           </ViewBtn>
+          <ViewBtn active={view === 'oraculo'} onClick={() => setView('oraculo')}>
+            🔮 Oráculo
+          </ViewBtn>
         </div>
       </div>
 
-      {view === 'lista' ? (
+      {view === 'oraculo' ? (
+        <div className="mx-auto w-full max-w-5xl flex-1 overflow-y-auto px-6 pb-6 pt-5">
+          <Oraculo survivors={survivors} members={members} relationships={relationships} dia={dia} />
+        </div>
+      ) : view === 'lista' ? (
         <div className="mx-auto w-full max-w-5xl flex-1 overflow-y-auto px-6 pb-6 pt-5">
           {/* Estatísticas */}
           <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
