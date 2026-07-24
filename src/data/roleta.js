@@ -86,6 +86,7 @@ export const ELIMINATIONS = [
   'pippo',         // Dia 72 — Pippo
   'martina',       // Dia 73 — Martina
   'ines_barbeiro', // Dia 74 — Inês Barbeiro
+  'estrela',       // Dia 75 — Estrela
 ]
 
 // Notas/comentários da roleta por dia (o que foi dito no sorteio de cada dia).
@@ -99,6 +100,7 @@ export const ELIMINATION_NOTES = {
   39: 'já não há balcão',
   40: 'de jato',
   59: 'a das fotos',
+  75: 'quer cometa',
 }
 
 /** Map id → dia (1-based) dos eliminados. */
