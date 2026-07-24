@@ -204,7 +204,7 @@ const FEMALE = new Set([
   'sofia_pascoa', 'tildes', 'bia_l', 'marta', 'leti', 'matilde_alves', 'kika_rocha',
   'mini_rita', 'maria_p', 'sissi', 'gabi', 'carol', 'joana', 'susi', 'nanda',
   'rita_pais', 'eva', 'sara', 'sofia_l', 'tita', 'morgana', 'ana', 'luisa',
-  'catarina', 'estrela', 'matilde_roque', 'matilde_conde', 'martina', 'kika_moreira',
+  'catarina', 'matilde_roque', 'matilde_conde', 'martina', 'kika_moreira',
   'laura', 'leonor_mendes', 'rita_c', 'binga', 'ines_a', 'raquel', 'ines_barbeiro',
   'leonor_catarino', 'andreia', 'carmo', 'bia_wood',
 ])
