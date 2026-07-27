@@ -17,7 +17,7 @@ const RANK_BADGE = {
 const GEN_RANK = { 1: 'veterano', 3: 'doutor', 4: 'pastrano', 5: 'caloiro' }
 
 // Gen 2 não é uniforme — grau definido por pessoa (indicado pelo Raul).
-// Quem não aparece aqui (Carvalheira, André, Pedro) não tem grau.
+// Quem não aparece aqui (Carvalheira, André) não tem grau.
 const GEN2_RANK = {
   gomes: 'doutor', vasco: 'doutor',
   piri: 'veterano', bras: 'veterano', clara: 'veterano', rodolfo: 'veterano',
