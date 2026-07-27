@@ -14,7 +14,7 @@ const genName = (g) => GEN_NAME[g] || `Geração ${g}`
 export default function RoletaTimeline({ members, relationships }) {
   const byId = useMemo(() => new Map(members.map((m) => [m.id, m])), [members])
 
-  const { perDay, series, maxY, N, participantsN } = useMemo(() => {
+  const { perDay, series, maxY, N, participantsN, current } = useMemo(() => {
     const excluded = new Set(ROULETTE_EXCLUDED)
     const participants = members.filter((m) => !excluded.has(m.id))
     const N = ELIMINATIONS.length
@@ -55,7 +55,8 @@ export default function RoletaTimeline({ members, relationships }) {
       FOUNDER_ORDER.forEach((f) => series[f].push(lineAlive[f]))
       perDay.push({ day: d, member: m, note: ELIMINATION_NOTES[d] || null, milestones: ms, survivors: participants.length - d })
     }
-    return { perDay, series, maxY, N, participantsN: participants.length }
+    // `lineAlive` no fim = sobreviventes atuais por linhagem
+    return { perDay, series, maxY, N, participantsN: participants.length, current: { ...lineAlive } }
   }, [members, relationships, byId])
 
   // ── Gráfico (multi-linha por linhagem) ──
@@ -93,7 +94,7 @@ export default function RoletaTimeline({ members, relationships }) {
             <span key={f} className="flex items-center gap-1.5 text-xs text-champi-text-dim">
               <span className="h-2.5 w-2.5 rounded-full" style={{ background: FOUNDER_BADGES[f]?.color }} />
               {LINEAGE_LABELS[f] || byId.get(f)?.name}
-              <b className="text-champi-text">{series[f][N]}</b>
+              <b className="text-champi-text">{current[f] ?? 0}</b>
             </span>
           ))}
           <span className="flex items-center gap-1 text-xs text-champi-text-dim">
