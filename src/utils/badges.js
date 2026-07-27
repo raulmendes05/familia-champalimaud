@@ -26,7 +26,7 @@ const GEN2_RANK = {
 }
 
 // Exceções: membros sem grau hierárquico, mesmo que a geração indicasse um.
-const NO_RANK = new Set(['sissi', 'maria_p'])
+const NO_RANK = new Set(['sissi'])
 
 // Alcunhas lendárias escolhidas à mão (além das mais compridas).
 const LEGENDARY_NICK = new Set(['gabriel', 'ximenes'])
