@@ -89,6 +89,7 @@ export const ELIMINATIONS = [
   'estrela',       // Dia 75 — Estrela
   'tita',          // Dia 76 — Tita (Matilde Matos)
   'piri',          // Dia 77 — Piri
+  'catarina',      // Dia 78 — Catarina
 ]
 
 // Notas/comentários da roleta por dia (o que foi dito no sorteio de cada dia).
