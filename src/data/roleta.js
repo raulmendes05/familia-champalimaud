@@ -91,6 +91,7 @@ export const ELIMINATIONS = [
   'piri',          // Dia 77 — Piri
   'catarina',      // Dia 78 — Catarina
   'clara',         // Dia 79 — Clara
+  'gabriel',       // Dia 80 — Gabriel (Picha)
 ]
 
 // Notas/comentários da roleta por dia (o que foi dito no sorteio de cada dia).
