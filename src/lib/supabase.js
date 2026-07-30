@@ -144,25 +144,27 @@ export async function addEventPhoto(eventId, authorName, url, caption) {
   return data
 }
 
-// ── Votação do vencedor da Roleta ────────────────────────────────────────────
-/** Devolve { member_id -> nº de votos }. */
-export async function fetchFinalistVotes() {
-  if (!supabase) return {}
-  const { data, error } = await supabase.from('finalist_votes').select('member_id')
+// ── Votação do vencedor da Roleta (1 voto por membro, trancado) ──────────────
+/** Devolve { tally: {choiceId: nº votos}, votedBy: {voterId: choiceId} }. */
+export async function fetchWinnerVotes() {
+  if (!supabase) return { tally: {}, votedBy: {} }
+  const { data, error } = await supabase.from('winner_votes').select('voter_id, choice_id')
   if (error) throw error
   const tally = {}
-  for (const row of data) tally[row.member_id] = (tally[row.member_id] || 0) + 1
-  return tally
+  const votedBy = {}
+  for (const r of data) {
+    tally[r.choice_id] = (tally[r.choice_id] || 0) + 1
+    votedBy[r.voter_id] = r.choice_id
+  }
+  return { tally, votedBy }
 }
 
-/** Regista/atualiza o voto deste navegador (voterKey). */
-export async function castFinalistVote(voterKey, memberId) {
+/** Regista o voto de um membro. Falha se esse membro já votou (voto trancado). */
+export async function castWinnerVote(voterId, choiceId) {
   if (!supabase) throw new Error('Supabase não configurado.')
-  const { error } = await supabase
-    .from('finalist_votes')
-    .upsert(
-      { voter_key: voterKey, member_id: memberId, updated_at: new Date().toISOString() },
-      { onConflict: 'voter_key' }
-    )
-  if (error) throw error
+  const { error } = await supabase.from('winner_votes').insert({ voter_id: voterId, choice_id: choiceId })
+  if (error) {
+    if (error.code === '23505') throw new Error('Esse nome já votou — o voto fica trancado.')
+    throw error
+  }
 }
