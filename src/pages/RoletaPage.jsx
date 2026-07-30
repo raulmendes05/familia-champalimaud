@@ -4,6 +4,7 @@ import FamilyTree from '../components/FamilyTree'
 import MemberPanel from '../components/MemberPanel'
 import Oraculo from '../components/Oraculo'
 import RoletaTimeline from '../components/RoletaTimeline'
+import Finalistas from '../components/Finalistas'
 import { ELIMINATIONS, ROULETTE_EXCLUDED, eliminationMap } from '../data/roleta'
 import { lineageOf } from '../utils/tree'
 import { isFounder, LINEAGE_LABELS } from '../data/founders'
@@ -117,20 +118,24 @@ export default function RoletaPage() {
             <Stat value={participants.length} label="Na roleta" />
           </div>
 
-          {/* Sobreviventes */}
-          <section className="mb-8">
-            <h2 className="mb-3 border-b border-champi-line pb-2 font-display text-xl font-semibold text-champi-text">
-              🟢 Ainda na família · {survivors.length}
-            </h2>
-            <div className="grid grid-cols-3 gap-3 sm:grid-cols-5 md:grid-cols-7">
-              {survivors.map((m) => (
-                <div key={m.id} className="flex flex-col items-center text-center">
-                  <Avatar member={m} />
-                  <p className="mt-1 w-full truncate text-xs font-medium text-champi-text">{m.name}</p>
-                </div>
-              ))}
-            </div>
-          </section>
+          {/* Sobreviventes / Reta Final */}
+          {survivors.length > 0 && survivors.length <= 6 ? (
+            <Finalistas survivors={survivors} members={members} relationships={relationships} />
+          ) : (
+            <section className="mb-8">
+              <h2 className="mb-3 border-b border-champi-line pb-2 font-display text-xl font-semibold text-champi-text">
+                🟢 Ainda na família · {survivors.length}
+              </h2>
+              <div className="grid grid-cols-3 gap-3 sm:grid-cols-5 md:grid-cols-7">
+                {survivors.map((m) => (
+                  <div key={m.id} className="flex flex-col items-center text-center">
+                    <Avatar member={m} />
+                    <p className="mt-1 w-full truncate text-xs font-medium text-champi-text">{m.name}</p>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
 
           {/* Gráfico + cronologia com marcos */}
           <RoletaTimeline members={members} relationships={relationships} />

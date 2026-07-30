@@ -143,3 +143,26 @@ export async function addEventPhoto(eventId, authorName, url, caption) {
   if (error) throw error
   return data
 }
+
+// ── Votação do vencedor da Roleta ────────────────────────────────────────────
+/** Devolve { member_id -> nº de votos }. */
+export async function fetchFinalistVotes() {
+  if (!supabase) return {}
+  const { data, error } = await supabase.from('finalist_votes').select('member_id')
+  if (error) throw error
+  const tally = {}
+  for (const row of data) tally[row.member_id] = (tally[row.member_id] || 0) + 1
+  return tally
+}
+
+/** Regista/atualiza o voto deste navegador (voterKey). */
+export async function castFinalistVote(voterKey, memberId) {
+  if (!supabase) throw new Error('Supabase não configurado.')
+  const { error } = await supabase
+    .from('finalist_votes')
+    .upsert(
+      { voter_key: voterKey, member_id: memberId, updated_at: new Date().toISOString() },
+      { onConflict: 'voter_key' }
+    )
+  if (error) throw error
+}
