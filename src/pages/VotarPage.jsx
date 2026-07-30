@@ -24,9 +24,16 @@ export default function VotarPage() {
   const [tally, setTally] = useState({})
   const [votedBy, setVotedBy] = useState({})
   const [voter, setVoter] = useState('') // id do membro que está a votar
+  const [query, setQuery] = useState('')
   const [choice, setChoice] = useState(null)
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState(null)
+
+  const nameMatches = useMemo(() => {
+    const q = query.trim().toLowerCase()
+    if (!q) return allMembers
+    return allMembers.filter((m) => m.name.toLowerCase().includes(q))
+  }, [allMembers, query])
 
   const reload = () => {
     if (isSupabaseConfigured()) fetchWinnerVotes().then(({ tally, votedBy }) => { setTally(tally); setVotedBy(votedBy) }).catch(() => {})
@@ -100,19 +107,44 @@ export default function VotarPage() {
         <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-champi-text-dim">
           1. Quem és tu?
         </label>
-        <select
-          value={voter}
-          onChange={(e) => { setVoter(e.target.value); setChoice(null); setErr(null) }}
-          className="w-full rounded-lg border border-champi-line bg-champi-ink-3/70 px-3 py-2.5 text-sm text-champi-text focus:border-champi-gold/60 focus:outline-none"
-        >
-          <option value="">— escolhe o teu nome —</option>
-          {allMembers.map((m) => (
-            <option key={m.id} value={m.id} disabled={!!votedBy[m.id]}>
-              {m.name}
-              {votedBy[m.id] ? ' ✓ (já votou)' : ''}
-            </option>
-          ))}
-        </select>
+
+        {voter ? (
+          <div className="flex items-center justify-between gap-2 rounded-lg border border-champi-line bg-champi-ink-3/70 px-3 py-2.5">
+            <span className="text-sm font-medium text-champi-text">{byId.get(voter)?.name}</span>
+            <button
+              onClick={() => { setVoter(''); setQuery(''); setChoice(null); setErr(null) }}
+              className="text-xs text-champi-text-dim underline hover:text-champi-gold"
+            >
+              mudar
+            </button>
+          </div>
+        ) : (
+          <>
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Escreve o teu nome…"
+              autoFocus
+              className="w-full rounded-lg border border-champi-line bg-champi-ink-3/70 px-3 py-2.5 text-sm text-champi-text placeholder:text-champi-text-dim/60 focus:border-champi-gold/60 focus:outline-none"
+            />
+            <ul className="mt-2 max-h-64 overflow-y-auto">
+              {nameMatches.map((m) => (
+                <li key={m.id}>
+                  <button
+                    onClick={() => { setVoter(m.id); setChoice(null); setErr(null) }}
+                    className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm text-champi-text transition hover:bg-champi-ink-3"
+                  >
+                    <span>{m.name}</span>
+                    {votedBy[m.id] && <span className="text-[11px] text-champi-text-dim">✓ já votou</span>}
+                  </button>
+                </li>
+              ))}
+              {nameMatches.length === 0 && (
+                <li className="px-3 py-2 text-xs text-champi-text-dim">Sem resultados para “{query}”.</li>
+              )}
+            </ul>
+          </>
+        )}
       </div>
 
       {/* Já votou → mostra e tranca */}
