@@ -22,14 +22,16 @@ function buildTable() {
   // Paredes retas: {a, b, e, kick}
   const wall = (ax, ay, bx, by, e = 0.42) => ({ a: [ax, ay], b: [bx, by], e, kick: 0 })
 
+  // As guias acabam PARALELAS ao flipper em repouso (30°): sem isso forma-se um
+  // "V" na base do flipper onde a bola fica presa.
   const walls = [
     wall(20, 220, 20, 540),      // parede esquerda
-    wall(20, 540, 112, 626),     // rampa esquerda (inlane)
-    wall(112, 626, 120, 640),
+    wall(20, 540, 100, 614),     // rampa esquerda (inlane)
+    wall(100, 614, 126, 629),    // guia paralela ao flipper esquerdo
     wall(420, 220, 420, 730),    // parede exterior direita (canal do lançador)
     wall(380, 250, 380, 540),    // divisória do canal
-    wall(380, 540, 288, 626),    // rampa direita
-    wall(288, 626, 280, 640),
+    wall(380, 540, 300, 614),    // rampa direita
+    wall(300, 614, 274, 629),    // guia paralela ao flipper direito
     wall(380, 730, 420, 730),    // chão do canal (a bola espera aqui)
   ]
 
@@ -37,19 +39,27 @@ function buildTable() {
   // As costas ficam afastadas da rampa o suficiente para a bola descer o corredor
   // sem encravar na cunha (canal ≥ 29px para uma bola de 18px).
   const slings = [
-    { a: [54, 436], b: [120, 570], anchor: [54, 532], e: 0.4, kick: 400, flash: 0 },
-    { a: [346, 436], b: [280, 570], anchor: [346, 532], e: 0.4, kick: 400, flash: 0 },
+    { a: [54, 436], b: [120, 570], anchor: [54, 532], e: 0.4, kick: 400, flash: 0, cool: 0, rapid: 0, last: -9 },
+    { a: [346, 436], b: [280, 570], anchor: [346, 532], e: 0.4, kick: 400, flash: 0, cool: 0, rapid: 0, last: -9 },
   ]
-  // As costas dos slingshots também são sólidas.
   for (const s of slings) {
+    // As costas dos slingshots também são sólidas (mas não dão pontapé).
     walls.push(wall(s.a[0], s.a[1], s.anchor[0], s.anchor[1], 0.3))
     walls.push(wall(s.anchor[0], s.anchor[1], s.b[0], s.b[1], 0.3))
+    // Normal virada para o campo: só dispara quando a bola bate DESTE lado.
+    const dx = s.b[0] - s.a[0]
+    const dy = s.b[1] - s.a[1]
+    const len = Math.hypot(dx, dy)
+    let nx = dy / len
+    let ny = -dx / len
+    if ((s.anchor[0] - s.a[0]) * nx + (s.anchor[1] - s.a[1]) * ny > 0) { nx = -nx; ny = -ny }
+    s.n = [nx, ny]
   }
 
   const bumpers = [
-    { x: 150, y: 262, r: 24, label: 'CHAMPI', flash: 0 },
-    { x: 220, y: 200, r: 24, label: 'PRAXE', flash: 0 },
-    { x: 290, y: 262, r: 24, label: 'FAMÍLIA', flash: 0 },
+    { x: 140, y: 266, r: 24, label: 'CHAMPI', flash: 0, cool: 0 },
+    { x: 220, y: 196, r: 24, label: 'PRAXE', flash: 0, cool: 0 },
+    { x: 300, y: 266, r: 24, label: 'FAMÍLIA', flash: 0, cool: 0 },
   ]
 
   const posts = [
@@ -201,6 +211,7 @@ export function createPinball(canvas, { onEvent = () => {}, hiScore = 0 } = {}) 
   let acc = 0
   let scale = 1
   let stuck = 0      // tempo que a bola leva quase parada (vigia de encravamento)
+  let clock = 0      // relógio da simulação (segundos)
 
   const emit = () =>
     onEvent({
@@ -290,6 +301,7 @@ export function createPinball(canvas, { onEvent = () => {}, hiScore = 0 } = {}) 
 
   // ── passo de física ──
   function step(dt) {
+    clock += dt
     // flippers
     for (const f of table.flippers) {
       const target = f.pressed ? f.up : f.rest
@@ -352,27 +364,50 @@ export function createPinball(canvas, { onEvent = () => {}, hiScore = 0 } = {}) 
     // postes
     for (const p of table.posts) resolve(ball, p.x, p.y, R + p.r, 0.6, 0)
 
-    // bumpers
+    // Bumpers e slingshots contam UM toque por contacto (`cool`): sem isso, uma
+    // bola encostada marcava pontos a 240×/s.
     for (const b of table.bumpers) {
-      const d = Math.hypot(ball.x - b.x, ball.y - b.y)
-      if (d < R + b.r) {
-        resolve(ball, b.x, b.y, R + b.r, 0.45, 430)
-        b.flash = 1
-        spark(b.x, b.y, 10)
-        audio.blip(660 + Math.random() * 200, 0.06, 'square', 0.05)
-        addScore(100, b.x, b.y - b.r - 6, b.label)
+      b.cool = Math.max(0, b.cool - dt)
+      if (Math.hypot(ball.x - b.x, ball.y - b.y) < R + b.r) {
+        const live = b.cool === 0
+        resolve(ball, b.x, b.y, R + b.r, 0.32, live ? 370 : 0)
+        if (live) {
+          // desvio lateral aleatório: sem ele a bola pode saltitar para sempre
+          // na vertical entre o bumper e o arco
+          const tx = -(ball.y - b.y)
+          const ty = ball.x - b.x
+          const tl = Math.hypot(tx, ty) || 1
+          const j = (Math.random() - 0.5) * 200
+          ball.vx += (tx / tl) * j
+          ball.vy += (ty / tl) * j
+          b.cool = 0.15
+          b.flash = 1
+          spark(b.x, b.y, 10)
+          audio.blip(660 + Math.random() * 200, 0.06, 'square', 0.05)
+          addScore(100, b.x, b.y - b.r - 6, b.label)
+        }
       }
     }
 
-    // slingshots
     for (const s of table.slings) {
+      s.cool = Math.max(0, s.cool - dt)
       const [qx, qy] = closestOnSeg(ball.x, ball.y, s.a[0], s.a[1], s.b[0], s.b[1])
       if (Math.hypot(ball.x - qx, ball.y - qy) < R) {
-        resolve(ball, qx, qy, R, s.e, s.kick)
-        s.flash = 1
-        spark(qx, qy, 6)
-        audio.blip(320, 0.05, 'sawtooth', 0.04)
-        addScore(50, qx, qy - 10)
+        // Só dispara pela frente; nas costas e no bico é parede, senão a bola
+        // ficava entalada a levar pontapés dos dois lados.
+        const front = (ball.x - qx) * s.n[0] + (ball.y - qy) * s.n[1] > 0
+        const live = front && s.cool === 0
+        // Se dispara muitas vezes seguidas é porque a bola está entalada: empurrão.
+        if (live) s.rapid = clock - s.last < 0.4 ? (s.rapid || 0) + 1 : 0
+        resolve(ball, qx, qy, R, s.e, live ? s.kick * (s.rapid >= 3 ? 2.4 : 1) : 0)
+        if (live) {
+          s.last = clock
+          s.cool = 0.15
+          s.flash = 1
+          spark(qx, qy, 6)
+          audio.blip(320, 0.05, 'sawtooth', 0.04)
+          addScore(50, qx, qy - 10)
+        }
       }
     }
 
@@ -417,7 +452,7 @@ export function createPinball(canvas, { onEvent = () => {}, hiScore = 0 } = {}) 
     // flippers a bola pode estar "ao colo" de propósito — aí espera-se mais.
     if (state.phase === 'play' && !inLane()) {
       stuck = Math.hypot(ball.vx, ball.vy) < 34 ? stuck + dt : 0
-      if (stuck > (ball.y > 580 ? 6 : 2.5)) {
+      if (stuck > (ball.y > 580 ? 3.5 : 2.5)) {
         stuck = 0
         ball.vx += (Math.random() < 0.5 ? -1 : 1) * (160 + Math.random() * 120)
         ball.vy -= 260
@@ -718,8 +753,16 @@ export function createPinball(canvas, { onEvent = () => {}, hiScore = 0 } = {}) 
     newGame,
     setMuted: (v) => audio.setMuted(v),
     getHi: () => state.hi,
-    // usado só em desenvolvimento (testes de física)
+    // usados só em desenvolvimento (testes de física)
     getBall: () => ({ x: ball.x, y: ball.y, vx: ball.vx, vy: ball.vy, phase: state.phase }),
+    putBall: (x, y) => {
+      ball.x = x
+      ball.y = y
+      ball.vx = 0
+      ball.vy = 0
+      ball.trail.length = 0
+      state.phase = 'play'
+    },
     destroy() { cancelAnimationFrame(raf) },
   }
 }
