@@ -94,6 +94,7 @@ export const ELIMINATIONS = [
   'gabriel',       // Dia 80 — Gabriel (Picha)
   'pedro',         // Dia 81 — Pedro (Edro)
   'vaz',           // Dia 82 — Vaz
+  'leti',          // Dia 83 — Letícia
 ]
 
 // Notas/comentários da roleta por dia (o que foi dito no sorteio de cada dia).
