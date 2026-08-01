@@ -144,7 +144,28 @@ export async function addEventPhoto(eventId, authorName, url, caption) {
   return data
 }
 
-// ── Votação do vencedor da Roleta (1 voto por membro, trancado) ──────────────
+// ── Votação do vencedor da Roleta (1 voto por membro E por dispositivo) ───────
+/**
+ * ID estável por dispositivo, guardado no localStorage. Serve de trava
+ * anti-trafulha: cada browser só pode registar um voto (constraint UNIQUE na BD),
+ * por muito que troquem de nome. Não impede quem use vários telemóveis, mas mata
+ * o esquema de martelar dezenas de votos do mesmo sítio.
+ */
+export function getDeviceId() {
+  const KEY = 'champi_device_id'
+  try {
+    let id = localStorage.getItem(KEY)
+    if (!id) {
+      id = crypto.randomUUID()
+      localStorage.setItem(KEY, id)
+    }
+    return id
+  } catch {
+    // localStorage indisponível (modo privado antigo, etc.) — gera efémero.
+    return crypto.randomUUID()
+  }
+}
+
 /** Devolve { tally: {choiceId: nº votos}, votedBy: {voterId: choiceId} }. */
 export async function fetchWinnerVotes() {
   if (!supabase) return { tally: {}, votedBy: {} }
@@ -159,12 +180,21 @@ export async function fetchWinnerVotes() {
   return { tally, votedBy }
 }
 
-/** Regista o voto de um membro. Falha se esse membro já votou (voto trancado). */
+/**
+ * Regista o voto de um membro. Falha se esse nome já votou OU se este
+ * dispositivo já votou (ambos são UNIQUE na base de dados).
+ */
 export async function castWinnerVote(voterId, choiceId) {
   if (!supabase) throw new Error('Supabase não configurado.')
-  const { error } = await supabase.from('winner_votes').insert({ voter_id: voterId, choice_id: choiceId })
+  const { error } = await supabase
+    .from('winner_votes')
+    .insert({ voter_id: voterId, choice_id: choiceId, device_id: getDeviceId() })
   if (error) {
-    if (error.code === '23505') throw new Error('Esse nome já votou — o voto fica trancado.')
+    if (error.code === '23505') {
+      if (String(error.message || '').includes('device'))
+        throw new Error('Este dispositivo já votou — só se aceita um voto por telemóvel/computador.')
+      throw new Error('Esse nome já votou — o voto fica trancado.')
+    }
     throw error
   }
 }

@@ -28,6 +28,10 @@ export default function VotarPage() {
   const [choice, setChoice] = useState(null)
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState(null)
+  // Voto já feito a partir deste dispositivo (trava anti-trafulha, guarda choiceId)
+  const [deviceVote, setDeviceVote] = useState(() => {
+    try { return localStorage.getItem('champi_winner_voted') } catch { return null }
+  })
 
   const nameMatches = useMemo(() => {
     const q = query.trim().toLowerCase()
@@ -51,6 +55,8 @@ export default function VotarPage() {
       await castWinnerVote(voter, choice)
       reload()
       setVotedBy((v) => ({ ...v, [voter]: choice }))
+      try { localStorage.setItem('champi_winner_voted', choice) } catch { /* ignore */ }
+      setDeviceVote(choice)
     } catch (e) {
       setErr(e.message || String(e))
       reload()
@@ -96,13 +102,28 @@ export default function VotarPage() {
 
   return (
     <div className="mx-auto h-full w-full max-w-lg overflow-y-auto p-6">
-      <h1 className="font-display text-3xl font-semibold text-champi-gold">🗳️ Aposta no Vencedor</h1>
+      <h1 className="font-display text-3xl font-semibold text-champi-gold">🏆 Aposta no Vencedor · TOP 3</h1>
       <p className="mt-1 text-sm text-champi-text-dim">
-        Quem achas que vai ficar em <b>primeiro</b> na Roleta Champi? Só para membros da família — cada
-        um vota uma vez e o voto fica trancado.
+        Restam <b>3 finalistas</b>. Quem achas que vai ficar em <b>primeiro</b> na Roleta Champi?
+        Só para membros da família — <b>um voto por pessoa e por dispositivo</b>, e fica trancado.
       </p>
 
+      {/* Este dispositivo já votou → tranca tudo (anti-trafulha) */}
+      {deviceVote && (
+        <div className="card mt-5 p-4 text-center">
+          <p className="text-sm text-champi-text">
+            🔒 Já votaste a partir deste dispositivo — apostaste em{' '}
+            <b className="text-champi-gold">{byId.get(deviceVote)?.name || '???'}</b>.
+          </p>
+          <p className="mt-1 text-xs text-champi-text-dim">
+            Só se aceita um voto por telemóvel/computador. O voto está trancado.
+          </p>
+          <Results />
+        </div>
+      )}
+
       {/* Passo 1: quem és tu */}
+      {!deviceVote && (
       <div className="card mt-5 p-4">
         <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-champi-text-dim">
           1. Quem és tu?
@@ -146,6 +167,7 @@ export default function VotarPage() {
           </>
         )}
       </div>
+      )}
 
       {/* Já votou → mostra e tranca */}
       {alreadyVoted && (
@@ -205,7 +227,7 @@ export default function VotarPage() {
         </div>
       )}
 
-      {!voter && total > 0 && (
+      {!deviceVote && !voter && total > 0 && (
         <div className="card mt-4 p-4">
           <Results />
         </div>
