@@ -96,6 +96,7 @@ export const ELIMINATIONS = [
   'vaz',           // Dia 82 — Vaz
   'leti',          // Dia 83 — Letícia
   'vasco',         // Dia 84 — Vasco
+  'vartels',       // Dia 85 — Vartels (vice-campeão) → BRÁS VENCEDOR
 ]
 
 // Notas/comentários da roleta por dia (o que foi dito no sorteio de cada dia).
