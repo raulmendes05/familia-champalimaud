@@ -5,6 +5,7 @@ import MemberPanel from '../components/MemberPanel'
 import Oraculo from '../components/Oraculo'
 import RoletaTimeline from '../components/RoletaTimeline'
 import Finalistas from '../components/Finalistas'
+import Podio from '../components/Podio'
 import { ELIMINATIONS, ROULETTE_EXCLUDED, eliminationMap } from '../data/roleta'
 import { lineageOf } from '../utils/tree'
 import { isFounder, LINEAGE_LABELS } from '../data/founders'
@@ -118,8 +119,10 @@ export default function RoletaPage() {
             <Stat value={participants.length} label="Na roleta" />
           </div>
 
-          {/* Sobreviventes / Reta Final */}
-          {survivors.length > 0 && survivors.length <= 6 ? (
+          {/* Pódio final (roleta terminada) / Reta Final / lista */}
+          {survivors.length === 1 ? (
+            <Podio champion={survivors[0]} members={members} relationships={relationships} />
+          ) : survivors.length > 1 && survivors.length <= 6 ? (
             <Finalistas survivors={survivors} members={members} relationships={relationships} />
           ) : (
             <section className="mb-8">
