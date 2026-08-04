@@ -1,6 +1,6 @@
 // Conquistas (badges) de cada membro — TUDO derivado dos dados reais
 // (relações + roleta + geração). Sem estado: dá o mesmo resultado sempre.
-import { eliminationMap, ROULETTE_EXCLUDED } from '../data/roleta'
+import { eliminationMap, ROULETTE_EXCLUDED, ELIMINATIONS } from '../data/roleta'
 import { isFounder } from '../data/founders'
 
 const VERT = new Set(['padrinho', 'madrinha'])
@@ -110,15 +110,45 @@ export function badgesFor(member, members, relationships) {
     })
   }
 
-  // Roleta
+  // Roleta — inclui o pódio final (só quando resta 1 sobrevivente).
+  const survivorsCount = members.filter((m) => !excluded.has(m.id) && !elimMap.has(m.id)).length
+  const rouletteOver = survivorsCount === 1
+  const runnerUpId = ELIMINATIONS[ELIMINATIONS.length - 1] // 2.º = último eliminado
+  const thirdId = ELIMINATIONS[ELIMINATIONS.length - 2] // 3.º = penúltimo eliminado
+
   if (!excluded.has(member.id)) {
     if (elimMap.has(member.id)) {
+      if (rouletteOver && member.id === runnerUpId) {
+        out.push({
+          key: 'vice',
+          emoji: '🥈',
+          label: 'Vice-campeão',
+          desc: '2.º lugar na Roleta Champi.',
+          color: '#cfd4db',
+        })
+      } else if (rouletteOver && member.id === thirdId) {
+        out.push({
+          key: 'terceiro',
+          emoji: '🥉',
+          label: '3.º lugar',
+          desc: '3.º lugar na Roleta Champi.',
+          color: '#d0894e',
+        })
+      }
       out.push({
         key: 'caido',
         emoji: '⚰️',
         label: `Caído (Dia ${elimMap.get(member.id)})`,
         desc: 'Já foi "expulso" na Roleta Champi.',
         color: '#d9657a',
+      })
+    } else if (rouletteOver) {
+      out.push({
+        key: 'campeao',
+        emoji: '🥇',
+        label: 'Campeão',
+        desc: 'Venceu a Roleta Champi — o último de pé.',
+        color: '#E7C15A',
       })
     } else {
       out.push({
