@@ -32,3 +32,7 @@ scratch_*.json
 
 # Fotos originais (não versionar)
 fotos-champi/
+
+# Worktrees de agentes e projetos embutidos (não pertencem a este repo)
+Champi.worktrees/
+ChampiBot/
