@@ -41,9 +41,6 @@ export default function Navbar() {
         <NavLink to="/quiz" className={linkClass}>
           Quiz
         </NavLink>
-        <NavLink to="/pinball" className={linkClass}>
-          Pinball
-        </NavLink>
         <NavLink to="/eventos" className={linkClass}>
           Eventos
         </NavLink>
